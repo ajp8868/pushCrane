@@ -86,7 +86,6 @@ to globals.setup
   
   let #expandTR (gen "Tr" col.size)
   let #expandTL (gen "Tl" col.size)
-  let #expandTD (gen "Td" col.size)
   
   let #expandBR (gen "Br" col.size)
   let #expandBL (gen "Bl" col.size)
@@ -112,6 +111,7 @@ to globals.setup
     
     (list "TD" (task [cmd-stack.push (gen "Td" arm.dist-to-top-of-col)]) )
     (list "BD" (task [cmd-stack.push (gen "Bd" arm.dist-to-bottom-of-col)]) )
+    (list "LD" (task [cmd-stack.push (gen "Ld" arm.dist-to-left-of-col)]) )
 
 
 
@@ -129,6 +129,7 @@ to globals.setup
     
     (list "Lr" (task [left.arm.cmd-right]) )
     (list "Ll" (task [left.arm.cmd-left]) )
+    (list "Ld" (task [left.arm.cmd-down]) )
     
     
 
@@ -559,12 +560,12 @@ end
 ;
 
 to-report arm.dist-to-top-of-col 
-  let #top block.at-top-of Top.arm.col
+  let #block block.at-top-of Top.arm.col
   let #dist [ycor] of arm0
   
-  ifelse (#top = nobody)
+  ifelse (#block = nobody)
   [ set #dist (#dist - floor.height) ]
-  [ set #dist (#dist - ([ycor] of #top) - ([size] of #top) / 2) ]
+  [ set #dist (#dist - ([ycor] of #block) - ([size] of #block) / 2) ]                                                    ;;stop when tuching
   
 ;  if (arm.holds != nobody)
 ;  [ set #dist (#dist - ([size] of arm.holds)) ]
@@ -573,23 +574,45 @@ to-report arm.dist-to-top-of-col
   report #dist
 end
 
+;=============================================================================================================================================================================================
+; Reporting distance for Down Method
+;============================================================================================================================================================================================= 
+
+
+
 
 to-report arm.dist-to-bottom-of-col
-  let #bottom block.at-bottom-of Bottom.arm.col
-  let #dist col.pixels
+  let #block block.at-bottom-of Bottom.arm.col
+  let #dist [ycor] of arm1
+    
+  ifelse (#block = nobody)
+  [ set #dist (#dist + ( [ycor] of arm0 - floor.height)) ]  
+  [ set #dist ([ycor] of #block - [size] of #block / 2) - #dist   ]
   
-  ifelse (#bottom = nobody)
-  [ set #dist (#dist - ( [ycor] of arm1 + floor.height)) ]
-  [ set #dist (#dist - ([ycor] of #bottom) - ([size] of #bottom) / 2) ]
-  
-  
-  if (arm.holds != nobody)
-  [ set #dist (#dist - ([size] of arm.holds)) ]
-  
-  set #dist (#dist - (arm.size / 2) + 1)
+  set #dist (#dist - (arm.size / 2) + 1) 
   report #dist
 end
 
+;;
+;; Left
+to-report arm.dist-to-left-of-col
+  let #block block.at-left-of Left.arm.col
+  let #dist [xcor] of arm2
+  
+  ifelse (#block = nobody)
+  [ set #dist (#dist + ( col.pixels - floor.height))]
+  [ set #dist ([xcor] of #block - [size] of #block / 2) - #dist   ]
+  
+  
+  set #dist (#dist - (arm.size / 2) + 1)
+  report #dist
+  
+end
+
+
+;=============================================================================================================================================================================================
+; Reporting arm colum
+;============================================================================================================================================================================================= 
 
 to-report Top.arm.col 
     report int (([xcor] of arm0) / col.size)
@@ -895,7 +918,7 @@ TEXTBOX
 158
 1006
 214
-different cmds\nexec.move-to [#rail #column]\nexec.make1 [#name #shape #size #color]
+different cmds\nexec.move-to \"T\" 4\nexec.make1 \"cube\" \"blk-cube\" 5 \"blue\"
 11
 0.0
 1
