@@ -240,3 +240,97 @@
        }
      })
 
+;====================================
+; operators for executive calls
+;====================================
+
+
+(def exec-ops
+  '{ push-up
+     { :pre ( (hand empty)
+              (at ?x ?s)
+              (on ?x ?y)
+              (cleartop ?x)
+              (isa ?x ?_)
+              )
+       :del ( (hand empty)
+              (at ?x ?s)
+              (on ?x ?y)
+              )
+       :add ( (holds ?x)
+              (cleartop ?y)
+              )
+       :txt (grasp! ?x off ?y at ?s)
+       :cmd (pick-from ?s)
+       }
+     push-down
+     { :pre ( (holds ?x)
+              (at ?dst ?s)
+              (cleartop ?dst)
+              )
+       :del ( (holds ?x)
+              (cleartop ?dst)
+              )
+       :add ( (hand empty)
+              (on ?x ?dst)
+              (at ?x ?s)
+              (cleartop ?x)
+              )
+       :txt (put! ?x on ?dst at ?s)
+       :cmd (drop-at ?s)
+       }
+     push-to
+     { :pre ( (holds ?x)
+              (at ?dst ?s)
+              (cleartop ?dst)
+              )
+       :del ( (holds ?x)
+              (cleartop ?dst)
+              )
+       :add ( (hand empty)
+              (on ?x ?dst)
+              (at ?x ?s)
+              (cleartop ?x)
+              )
+       :txt (put! ?x on ?dst at ?s)
+       :cmd (drop-at ?s)
+       }
+     push-across
+     { :pre ( (holds ?x)
+              (at ?dst ?s)
+              (cleartop ?dst)
+              )
+       :del ( (holds ?x)
+              (cleartop ?dst)
+              )
+       :add ( (hand empty)
+              (on ?x ?dst)
+              (at ?x ?s)
+              (cleartop ?x)
+              )
+       :txt (put! ?x on ?dst at ?s)
+       :cmd (drop-at ?s)
+       }
+     create
+     { :pre ( (hand empty) )
+       :del ( (hand empty) )
+       :add ( (isa  ?x ?isa)
+              (size ?x ?size)
+              (color ?x ?color)
+              (holds ?x)
+              )
+       :txt (make! ?x ?isa size= ?size color= ?color)
+       :cmd (make ?x ?isa ?size ?color)
+       }
+     dispose
+     { :pre ( (holds ?x)        (isa ?x ?obj)
+              (color ?x ?color) (size ?x ?size)
+              )
+       :del ( (holds ?x) (cleartop ?x) (isa ?x ?obj)
+              (color ?x ?color) (size ?x ?size)
+              )
+       :add ( (hand empty) )
+       :txt (dispose! ?x)
+       :cmd (dispose)
+       }})
+

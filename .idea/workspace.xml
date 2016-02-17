@@ -46,8 +46,8 @@
       <file leaf-file-name="definitions.clj" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/definitions.clj">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.51729816">
-              <caret line="167" column="21" selection-start-line="167" selection-start-column="21" selection-end-line="167" selection-end-column="21" />
+            <state vertical-scroll-proportion="1.0510708">
+              <caret line="308" column="27" selection-start-line="308" selection-start-column="27" selection-end-line="308" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -429,12 +429,12 @@
       <option name="number" value="Default" />
       <updated>1455622723045</updated>
       <workItem from="1455622730732" duration="2759000" />
-      <workItem from="1455626901165" duration="3646000" />
+      <workItem from="1455626901165" duration="4882000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="6405000" />
+    <option name="totallyTimeSpent" value="7641000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
@@ -523,8 +523,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/definitions.clj">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.51729816">
-          <caret line="167" column="21" selection-start-line="167" selection-start-column="21" selection-end-line="167" selection-end-column="21" />
+        <state vertical-scroll-proportion="1.0510708">
+          <caret line="308" column="27" selection-start-line="308" selection-start-column="27" selection-end-line="308" selection-end-column="27" />
           <folding />
         </state>
       </provider>
