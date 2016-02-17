@@ -73,37 +73,170 @@
 
 (def block-ops
   '{ push-up
-     { :pre ( (hand empty)
-              (cleartop ?x)
+     { :pre ( (cleartop ?x)
               (isa ?x ?_)
               (on  ?x ?y)
               (at  ?x ?s)
               )
-       :del ( (hand empty)
-              (cleartop ?x)
+       :del ( (cleartop ?x)
               (on  ?x ?y)
               (at  ?x ?s)
               )
-       :add ( (holds ?x)
+       :add (
               (cleartop ?y)
               )
-       :txt (pick ?x off ?y at ?s)
-       :cmd (pick-from ?s)
+       :txt (push-up ?x off ?y at ?s)
+       :cmd (push-from ?s)
        }
-     drop
-     { :pre ( (holds ?x)
-              (cleartop ?y)
+     push-down
+     { :pre ( (cleartop ?y)
               (at ?y ?s)
               )
-       :del ( (holds ?x)
-              (cleartop ?y)
+       :del ( (cleartop ?y)
+              )
+       :add ( (cleartop ?x)
+              (on  ?x ?y)
+              (at  ?x ?s)
+              )
+       :txt (push-down ?x on ?y at ?s)
+       :cmd (push-down ?s)
+       }
+     push-across
+     { :pre ( (cleartop ?y)
+              (at ?y ?s)
+              )
+       :del ( (cleartop ?y)
+              )
+       :add ( (cleartop ?x)
+              (on  ?x ?y)
+              (at  ?x ?s)
+              )
+       :txt (push-across ?x on ?y at ?s)
+       :cmd (push-across ?s)
+       }
+     push-to
+     { :pre ( (cleartop ?y)
+              (at ?y ?s)
+              )
+       :del ( (cleartop ?y)
               )
        :add ( (hand empty)
               (cleartop ?x)
               (on  ?x ?y)
               (at  ?x ?s)
               )
-       :txt (drop ?x on ?y at ?s)
-       :cmd (drop-at ?s)
+       :txt (push-to ?x on ?y at ?s)
+       :cmd (push-to ?s)
        }
      })
+
+;====================================
+; goal focussed operators
+;====================================
+
+
+(def goal-ops
+  '{ :move-x1   ;; a handy multi-move operator when x & y on same s
+     ;     { :name move-x1
+     ;       :achieves (on ?x ?y)
+     ;       :when ((isa ?x ?_) (at ?x ?s) (at ?y ?s))
+     ;       :post ((protected ?s [on ?x ?y]) (holds ?x) (on ?x ?y))
+     ;       :del ((protected ?s [on ?x ?y]) )
+     ;       }
+     { :name move-x1
+       :achieves (on ?x ?y)
+       :when ((isa ?x ?_) (at ?x ?s) (at ?y ?s))
+       :post ((cleartop ?x) (on ?x ?y))
+       }
+
+     :move-x   ;; a handy multi-move operator
+     { :name move-x
+       :achieves (on ?x ?y)
+       :when ((isa ?x ?_) (at ?x ?sx) (at ?y ?sy) )
+       :post ((protected ?sx [on ?x ?y]) (protected ?sy [on ?x ?y])
+               (cleartop ?x) (cleartop ?y) )
+       :pre ((on ?x ?ox) )
+       :del ((at ?x ?sx)  (on ?x ?ox) (cleartop ?y)
+              (protected ?sx [on ?x ?y]) (protected ?sy [on ?x ?y]) )
+       :add ((at ?x ?sy) (on ?x ?y) (cleartop ?ox))
+       :cmd ((push-from ?sx) (push-to ?sy) )
+       :txt ((mv-push ?x off ?ox at ?sx)
+              (mv-push ?x on ?y at ?sy) )
+       }
+
+     :cleartop
+     { :name cleartop
+       :achieves (cleartop ?x)
+       :when ((on ?z ?x) (at ?z ?s))
+       :post ((protected ?s [cleartop ?x]) (cleartop ?z) (hand empty) )
+       :pre  ((stack ?new)  (:not (protected ?new ?_))
+               (at ?y ?new)  (cleartop ?y) )
+       :del ((protected ?s [cleartop ?x])
+              (on ?z ?x) (at ?z ?s) (cleartop ?y) )
+       :add ((cleartop ?x) (at ?z ?new) (on ?z ?y)    )
+       :cmd ((push-from ?s) (push-to ?new) )
+       :txt ((ct-push ?z off ?x at ?s)
+              (ct-push ?z on ?y at ?new) )
+       }
+
+     :push-up
+     { :name push-up
+       :achieves (hand empty)
+       :when ((holds ?x))
+       :pre  ((stack ?s) (:not (protected ?s ?_))
+               (at ?y ?s) (cleartop ?y)  )
+       :del  ((holds ?x) (cleartop ?y) )
+       :add  ((at ?x ?s) (on ?x ?y) (hand empty) (cleartop ?x))
+       :cmd  ((push-to ?s) )
+       :txt  ((push ?x on ?y at ?s) )
+       }
+
+     :push-down
+     { :name push-down
+       :achieves (holds ?x)
+       :when ((isa ?x ?_) (at ?x ?s) (on ?x ?y))
+       :post ((cleartop ?x) (hand empty))
+       :del  ((at ?x ?s) (on ?x ?y) (hand empty) (cleartop ?x))
+       :add  ((holds ?x) (cleartop ?y) )
+       :cmd  ((push-from ?s))
+       :txt  ((push ?x off ?y at ?s))
+       }
+
+     :push-to
+     { :name push-to
+       :achieves (at ?x ?s)
+       :post ((holds ?x))
+       :pre  ((at ?y ?s)
+               (cleartop ?y)  )
+       :del  ((holds ?x) (cleartop ?y) )
+       :add  ((at ?x ?s) (on ?x ?y) (hand empty) (cleartop ?x))
+       :cmd  ((push-to ?s) )
+       :txt  ((push ?x on ?y at ?s) )
+       }
+
+     :push-across
+     { :name push-across
+       :achieves (on ?x ?y)
+       :when ((isa ?x ?_) (at ?y ?s))
+       :post ((protected ?s [on ?x ?y])(cleartop ?y)(holds ?x))
+       :pre  ()
+       :del  ((holds ?x) (cleartop ?y) (protected ?s [on ?x ?y]))
+       :add  ((at ?x ?s) (on ?x ?y) (hand empty) (cleartop ?x))
+       :cmd  ((push-to ?s) )
+       :txt  ((push ?x on ?y at ?s) )
+       }
+
+     :drop-on-held
+     { :name drop-on-held
+       :achieves (on ?x ?y)
+       :when ((holds ?y))
+       :post ((hand empty) (on ?x ?y))
+       }
+
+     :protect-x
+     { :name protect-x
+       :achieves (protected ?x ?c)
+       :add  ((protected ?x ?c)  )
+       }
+     })
+
