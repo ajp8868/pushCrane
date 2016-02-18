@@ -89,6 +89,7 @@ to globals.setup
   
   set cmd-stack ""
   
+  
   let #expandTR (gen "Tr" col.size)
   let #expandTL (gen "Tl" col.size)
   
@@ -571,6 +572,13 @@ end
 
 ;
 
+
+
+;=============================================================================================================================================================================================
+; Reporting distance for Down Method
+;============================================================================================================================================================================================= 
+
+
 to-report arm.dist-to-top-of-col 
   let #block block.at-top-of Top.arm.col
   let #dist [ycor] of arm0
@@ -585,13 +593,6 @@ to-report arm.dist-to-top-of-col
   set #dist (#dist - (arm.size / 2) + 1)
   report #dist
 end
-
-;=============================================================================================================================================================================================
-; Reporting distance for Down Method
-;============================================================================================================================================================================================= 
-
-
-
 
 to-report arm.dist-to-bottom-of-col
   let #block block.at-bottom-of Bottom.arm.col
@@ -744,7 +745,7 @@ to exec.make [#name #size #x #y]
  [set block-name #name
    
    set size #size
-   set shape "blk-cube"
+   set shape "cube"
    set color blue
    
    setxy #x #y
@@ -820,16 +821,7 @@ end
 
 
 
-;to arm.retract
-;  inform 1 ["retracting arm to rail"]
-;  let #dist arm.base-height - ([ycor] of arm0)
-;  cmd-stack.queue (gen "u" #dist)
-;  cmd-stack.run
-;  ask ratchet0 [ set color black ]
-;  inform -1 ["-arm retract complete" ]
-;end
-;  
-  
+
 ;======================================================
 ; Extra
 ;======================================================
@@ -850,30 +842,6 @@ to-report block.at-left-of [#col]
 end
   
  
-;to inform [#i #m]
-;  let #ind-inc 2
-;  ifelse (#i = 0) [inform- #m]
-;  [ ifelse (#i = 0)
-;    [if (output-indent = 0) [output-print ""]
-;      inform- #m
-;      set output-indent (output-indent + #ind-inc)
-;    ]
-;    [
-;      set output-indent (output-indent - #ind-inc)
-;      inform- #m
-;    ]
-;  ]
-;end
-  
-;to inform- [#m]
-;  repeat output-indent [output-type " "]
-;  foreach #m
-;  [ output-type ?
-;    output-type " "
-;  ]
-;  output-print ""
-;end
-;  
 to-report col.xcor [#col]
   report (#col * col.size) + (int (col.size / 2)) - 1
 end
@@ -896,6 +864,41 @@ to block-flash [#b]
   ]
 end
   
+to setUpShaps
+  ;; making the triangles
+  exec.move-to "B" 2
+  exec.make1 "t1" "blk-triangl" 5 "blue"
+  exec.move-to "B" 3
+  exec.make1 "t2" "blk-triangl" 5 "green"
+  exec.move-to "B" 4
+  exec.make1 "t3" "blk-triangl" 5 "yellow"
+  exec.move-to "B" 5
+  exec.make1 "t4" "blk-triangl" 5 "red"
+  
+  exec.move-to "B" 1
+  exec.move-to "L" 2
+  
+  ;; making the circles
+  exec.make1 "c1" "blk-circle" 5 "blue"
+  exec.move-to "L" 3
+  exec.make1 "c2" "blk-circle" 5 "green"
+  exec.move-to "L" 4
+  exec.make1 "C3" "blk-circle" 5 "yellow"
+  exec.move-to "L" 5
+  exec.make1 "C4" "blk-circle" 5 "red"
+  
+  ;; making the Sqares
+  exec.move-to "L" 8
+   exec.move-to "B" 2
+  exec.make1 "S1" "blk-cube" 5 "blue"
+  exec.move-to "B" 3
+  exec.make1 "S2" "blk-cube" 5 "green"
+  exec.move-to "B" 4
+  exec.make1 "S3" "blk-cube" 5 "yellow"
+  exec.move-to "B" 5
+  exec.make1 "S4" "blk-cube" 5 "red"
+  
+end
   
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1015,23 +1018,23 @@ true
 0
 Polygon -7500403 true true 150 0 0 150 105 150 105 293 195 293 195 150 300 150
 
+blk-circle
+false
+0
+Circle -16777216 true false 0 0 300
+Circle -7500403 true true 15 15 270
+
 blk-cube
 false
 0
 Rectangle -16777216 true false 0 0 300 300
 Rectangle -7500403 true true 15 15 285 285
 
-blk-pyramid
+blk-triangl
 false
 0
 Polygon -16777216 true false 150 0 300 300 0 300
 Polygon -7500403 true true 150 30 30 285 270 285
-
-blk-sphere
-false
-0
-Circle -16777216 true false 0 0 300
-Circle -7500403 true true 15 15 270
 
 box
 false
