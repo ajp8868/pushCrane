@@ -49,3 +49,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+resource/sock2/sock2.jar
+.idea/workspace.xml
