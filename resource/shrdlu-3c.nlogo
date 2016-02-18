@@ -182,7 +182,7 @@ to patches.setup
 
   ; table patches
   
-  ask patches with [pycor = tableTop.height and pxcor < 40 and pxcor > tableLeft.width ]
+  ask patches with [pycor = tableTop.height  and pxcor > tableLeft.width ]
   [ set pcolor 2 ]
   
   ask patches with [pycor = tableBottom.height and pxcor > tableLeft.width]
