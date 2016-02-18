@@ -41,7 +41,12 @@ globals
   arm.size
   arm.retracted?
   arm.holds
-  arm.base-height
+  
+  
+   
+  top-arm.base-height
+  bottom-arm.base-height
+  left-arm.base-width
 
   
   ratchet0
@@ -116,20 +121,26 @@ to globals.setup
 
 
 ;    (list "U" (task [arm.retract])  )
+    (list "TU" (task [Top.arm.retract])  )
+    (list "BU" (task [Bottom.arm.retract])  )
+    (list "LU" (task [Left.arm.retract])  )
 ;    
     
     ;; bbot controls
     (list "Tr" (task [top.arm.cmd-right]) )
     (list "Tl" (task [top.arm.cmd-left]) )
     (list "Td" (task [top.arm.cmd-down]) )
+    (list "Tu" (task [top.arm.cmd-up]) )
     
     (list "Br" (task [bottom.arm.cmd-right]) )
     (list "Bl" (task [bottom.arm.cmd-left]) )
     (list "Bd" (task [bottom.arm.cmd-down]) )
+    (list "Bu" (task [bottom.arm.cmd-up]) )
     
     (list "Lr" (task [left.arm.cmd-right]) )
     (list "Ll" (task [left.arm.cmd-left]) )
     (list "Ld" (task [left.arm.cmd-down]) )
+    (list "Lu" (task [left.arm.cmd-up]) )
     
     
 
@@ -347,9 +358,9 @@ to rail.setup
   
   
   ;; draw the top arm
-  set arm.base-height (railTop-height - 3)
+  set top-arm.base-height (railTop-height - 3)
   create-arms 1
-  [ setxy #half-col arm.base-height
+  [ setxy #half-col top-arm.base-height
     set color black
     set size  3
     set heading 0
@@ -363,10 +374,10 @@ to rail.setup
   ]
   
   ;; draw the bottom arm
-  set arm.base-height (railBottom-height + 3)
+  set bottom-arm.base-height (railBottom-height + 3)
   create-arms 1
   [
-   setxy #half-col arm.base-height
+   setxy #half-col bottom-arm.base-height
    set color black
    set size 3
    set heading 0
@@ -379,9 +390,10 @@ to rail.setup
   
   ;; draw the left arm
   
+  set left-arm.base-width (railLeft-width + 3)
   create-arms 1
   [
-   setxy arm.base-height #half-col
+   setxy left-arm.base-width #half-col
    set color black
    set size 3
    set heading 0
@@ -609,7 +621,35 @@ to-report arm.dist-to-left-of-col
   
 end
 
+;=============================================================================================================================================================================================
+; Arm Retracting
+;============================================================================================================================================================================================= 
 
+
+to Top.arm.retract
+  
+  let #dist top-arm.base-height - ([ycor] of arm0)
+  cmd-stack.queue (gen "Tu" #dist)
+  cmd-stack.run
+  ask ratchet0 [ set color black ]
+end
+
+to Bottom.arm.retract
+  
+  let #dist [ycor] of arm1 - bottom-arm.base-height
+  cmd-stack.queue (gen "Bu" #dist)
+  cmd-stack.run
+  ask ratchet1 [ set color Yellow ]
+end
+
+to Left.arm.retract
+  
+  let #dist [xcor] of arm2 - left-arm.base-width 
+  cmd-stack.queue (gen "Lu" #dist)
+  cmd-stack.run
+  ask ratchet2 [ set color black ]
+end
+  
 ;=============================================================================================================================================================================================
 ; Reporting arm colum
 ;============================================================================================================================================================================================= 
