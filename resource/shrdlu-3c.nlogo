@@ -528,6 +528,8 @@ to left.arm.cmd-down
     hatch-rail-lines 1 [init-rail-vertical-line-agent]
     setxy (xcor + 1) ycor
   ]
+  
+  ;;moving arm
   ask (turtle-set arm.holds)
   [setxy (xcor + 1) ycor ]
 end
@@ -539,6 +541,8 @@ to left.arm.cmd-up
    setxy (xcor - 1) ycor
    ask rail-lines-here [die] 
   ]
+  
+  ;;moving block
   ask (turtle-set arm.holds)
   [
    setxy (xcor - 1) ycor 
@@ -587,8 +591,7 @@ to-report arm.dist-to-top-of-col
   [ set #dist (#dist - floor.height) ]
   [ set #dist (#dist - ([ycor] of #block) - ([size] of #block) / 2) ]                                                    ;;stop when tuching
   
-;  if (arm.holds != nobody)
-;  [ set #dist (#dist - ([size] of arm.holds)) ]
+
   
   set #dist (#dist - (arm.size / 2) + 1)
   report #dist
@@ -787,8 +790,7 @@ to exec.make1 [#name #shape #size #color]
     set shape-name #shape
     set color-name #color
 
-    set shape #shape
-    set color (runresult #color)
+    set shape #shape    set color (runresult #color)
 
     setxy ([xcor] of arm1) ([ycor] of arm2)
    ; arm.hold self
@@ -815,16 +817,80 @@ to exec.make1 [#name #shape #size #color]
   ask #b [st]
 end
 
-;======================================================
+;================================================================================================================================================================
 ; Shapes movement
-;======================================================
+;================================================================================================================================================================
+
+to pushshape [#arm #col #num]
+  
+  let #block block.at-top-of #col
+  
+  exec.move-to #arm #col
+  
+  cmd-stack.queue (word #arm "D")
+  cmd-stack.run
+  
+  arm.hold  convert.arm #arm convert.arm2 #arm #col 
+  
+  
+  cmd-stack.queue (gen (word #arm "d" ) (#num * col.size))
+  
+  cmd-stack.run
+      
+  arm.unhold convert.arm #arm
+  
+  cmd-stack.queue (word #arm "U")
+  cmd-stack.run
+  
+    
+end
+
+to-report convert.arm [#arm]
+  
+  let #myarm "A"
+  
+  ifelse (#arm = "T")
+  [set #myarm arm0    ]
+  [ifelse (#arm = "B")
+    [set #myarm arm1]
+    [set #myarm arm2 ]
+  ]
+   report #myarm
+end
 
 
+to-report convert.arm2 [#arm #col]
+  
+  let #myblock "A"
+  
+  ifelse (#arm = "T")
+  [set #myblock block.at-top-of #col]
+  [ifelse (#arm = "B")
+    [set #myblock block.at-bottom-of #col]
+    [set #myblock block.at-left-of #col ]
+  ]
+   report #myblock
+end
+
+to arm.hold [#arm #block]
+  ask #arm
+  [
+  set arm.holds #block
+  ]
+end
 
 
-;======================================================
+to arm.unhold [#arm]
+  ask #arm
+  [
+  set arm.holds nobody
+  ]
+end
+
+
+;================================================================================================================================================================
 ; Extra
-;======================================================
+;================================================================================================================================================================
   
 to-report block.at-top-of [#col]
   report max-one-of (blocks with [ xcor = (col.xcor #col)])
@@ -864,7 +930,7 @@ to block-flash [#b]
   ]
 end
   
-to setUpShaps
+to setUpShaes
   ;; making the triangles
   exec.move-to "B" 2
   exec.make1 "t1" "blk-triangl" 5 "blue"
@@ -889,7 +955,7 @@ to setUpShaps
   
   ;; making the Sqares
   exec.move-to "L" 8
-   exec.move-to "B" 2
+  exec.move-to "B" 2
   exec.make1 "S1" "blk-cube" 5 "blue"
   exec.move-to "B" 3
   exec.make1 "S2" "blk-cube" 5 "green"
