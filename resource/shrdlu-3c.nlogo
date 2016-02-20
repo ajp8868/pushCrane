@@ -729,6 +729,19 @@ to-report gen [#str #n]
 end 
 
 
+;================================================================================================================================================================
+; Repl
+;================================================================================================================================================================
+to exec.repl
+  let cmd-str sock2:read
+  output-print (word "received: " cmd-str)
+  run cmd-str
+  tick
+end
+
+
+
+
 ;======================================================
 ; Shapes making
 ;======================================================
@@ -1030,6 +1043,51 @@ TEXTBOX
 different cmds\nexec.move-to \"T\" 4\nexec.make1 \"cube\" \"blk-cube\" 5 \"blue\"
 11
 0.0
+1
+
+INPUTBOX
+630
+61
+714
+121
+port-num
+2225
+1
+0
+Number
+
+BUTTON
+632
+133
+707
+166
+connect
+print (word \"connecting on \" port-num)\nsock2:connect-local port-num\nprint \"socket connected\"
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+630
+183
+713
+216
+NIL
+exec.repl
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
 1
 
 @#$#@#$#@
