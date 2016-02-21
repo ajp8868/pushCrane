@@ -2,7 +2,7 @@
 (load-file "src/ops-search.clj")
 (load-file "src/wrappers.clj")
 (load-file "src/definitions.clj")
-;(load-file "strips-search.clj")
+(load-file "src/strips-search.clj")
 (load-file "src/planner.clj")
 (load-file "src/parsing.clj")
 
