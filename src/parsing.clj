@@ -51,6 +51,11 @@
     pyramid   {:cat noun, :sem (isa ?x pyramid)}
     triangle  {:cat noun, :sem (isa ?x pyramid)}
 
+    top-pusher  {:cat noun, :sem (isa ?x arm0)}
+    left-pusher  {:cat noun, :sem (isa ?x arm1)}
+    bottom-pusher  {:cat noun, :sem (isa ?x arm2)}
+
+    to     {:cat det}
     the    {:cat det} ;, :sem undef}
     a      {:cat det} ;, :sem undef}
     an     {:cat det}
@@ -69,7 +74,7 @@
     create  {:cat make, :arity 1, :sem make}
 
     place   {:cat put2, :arity 2, :sem put-on}
-    move    {:cat put2, :arity 2, :sem put-on}
+    move    {:cat put2, :arity 2, :sem move-pusher-to}
     put     {:cat put2, :arity 2, :sem put-on}
     })
 
@@ -95,7 +100,7 @@
 
 ;___ world context predicates ______________
 
-(defn stack? [x] (mfind [`(~'stack ~x) @block-data] true))
+(defn column? [x] (mfind [`(~'column ~x) @block-data] true))
 (defn block? [x] (mfind [`(~'isa ~x ~'?_) @block-data] true))
 
 (defn id-type? [x]    (and (map? x) (= (:type x) 'id)))
@@ -175,7 +180,7 @@
           (list 'create id
             (edit (:id obj) id (:sem obj))))
     )
-  (((-> ?cmd put2?) (-> ??obj noun-phrase) on (-> ?s stack?))
+  (((-> ?cmd put2?) (-> ??obj noun-phrase) on (-> ?c column?))
     :=> (list 'put-at (? obj) (? s))
     )
   (((-> ?cmd put2?) (-> ??obj1 noun-phrase) on (-> ??obj2 noun-phrase))
@@ -376,26 +381,6 @@
     )))
 
 
-;(defn goal [g]
-;  (ui-out :dbg 'goal g)
-;  (if-let [smap (ops-search @block-data (list g) block-ops)]
-;    (do
-;      (ui-out :dbg 'solved...)
-;      ; (ui-out :dbg smap)
-;      (ui-out :dbg 'plan= (:txt smap))
-;      (ui-out :dbg 'cmds= (:cmds smap))
-;      (doseq [c (:cmds smap)]
-;        (nlogo-send-exec c))
-;      (bd-set! (:state smap))
-;      (ui-set :bdat @block-data)
-;      )
-;    ; else - search failed
-;    (do (ui-out :dbg "Help! - I cannot find a way to do this")
-;      nil
-;      )
-;    ))
-
-
 
 ;================================
 ; general utils
@@ -413,20 +398,20 @@
 ; block-data
 ;================================
 
-(def no-stacks 8)
+(def no-columns 8)
 
-(defn gen-stack-names [n]
-  (map #(symbol (str/join (list "s" (str %))))
+(defn gen-column-names [n]
+  (map #(symbol (str/join (list "c" (str %))))
     (range n)))
 
 
 
-(defn gen-stack-tuples [s-names]
+(defn gen-column-tuples [c-names]
   (into #{}
     (reduce concat
-      (for [s s-names]
-        (with-mvars {'s s}
-          (mout '((stack ?s) (cleartop ?s) (at ?s ?s)))
+      (for [c c-names]
+        (with-mvars {'c c}
+          (mout '((column ?c) (at ?c ?c)))
           )))
     ))
 
@@ -461,7 +446,7 @@
   (reset-block-numbering)
   (ui-out :dbg 'resetting 'block-data)
   (set-atom! block-data #{})
-  (bd-add! (gen-stack-tuples (gen-stack-names no-stacks)))
+  (bd-add! (gen-column-tuples (gen-column-names no-columns)))
   (bd-add! '#{(hand empty)})
   (ui-set :bdat @block-data)
   @block-data
@@ -525,15 +510,6 @@
   (sentence (morph in-list))
   )
 
-;(defn shrep-1 [in-list]
-;  (ui-broadcast "_________________\n")
-;  (ui-out :comm "I heard: " in-list)
-;  (if (= (first in-list) 'exec)
-;    (exec (rest in-list))
-;    (sentence (morph in-list))
-;    ))
-
-
 (defn shrep-data [lists]
   (doseq [x lists] (shrep-1 x)))
 
@@ -554,62 +530,4 @@
   (set-shrdlu-comms port)
   (reset)
   )
-
-
-(def sample-test
-  '(make a blue box and put it on s3
-     then make a red block and put it on the blue box
-     then make a new yellow box
-     then put it on s2
-     then make an orange triangle and put it on b1
-     then make a brown ball and put it on b3
-     then put b2 on the ball
-     then pick up b4
-     then put b1 on b4
-     then put b3 on s1
-     then put b4 on b3
-     then make a box and put it on b1
-     then make a small pink box and put it on the grey box
-     ))
-
-
-(def els-test
-  '(make a blue box and put it on s3
-     then make a red block and put it on the blue box
-     then make a new yellow box
-     then put it on s2
-     then make an orange triangle and put it on s1
-     then make a brown ball and put it on b3
-     then put b2 on the ball
-     then make a box and put it on b1
-     then make a small pink box and put it on the grey box
-     ))
-
-(def video-prep
-  '(make a blue box and put it on s3
-     then make a red block and put it on the blue box
-     then make a new yellow box
-     then put it on s2
-     then make an orange triangle and put it on s1
-     then make a brown ball and put it on b3
-     then put b2 on the ball
-     then make a box and put it on b1
-     then make a small pink box and put it on the grey box
-    then put b5 on s4 then put b4 on b5
-    then make a small green box and put it on b3
-    ;then do...
-    ; put b3 on the blue box then pick up the small pink box and put it on b3
-     ))
-
-;(shrep-1 els-test)
-;(shrep-1 '(now put b2 on b1 and put b6 on b2))
-
-
-
-(defn run-repeatedly []
-  (for [x (range 1 5)]
-    (do
-      (shrep-1 '(put b7 on s4 then put b3 on b7))
-      (shrep-1 '(put b7 on s2 then put b2 on b7))
-      )))
 

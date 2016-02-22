@@ -12,18 +12,18 @@ globals
   railTop-height      ; rail ycor
   railBottom-height   ; rail ycor
   railLeft-width      ; rail xcor
-  
+
   ;working table
   tableTop.height
   tableBottom.height
   tableLeft.width
-  
- 
-  floor.height 
+
+
+  floor.height
 
   col.count        ; no. horizontal columns
   row.count        ; no. vertical columns
-  
+
   col.pixels
   col.size         ; size of a column - width & other uses
   row.size
@@ -36,28 +36,28 @@ globals
   arm0
   arm1
   arm2
-  
+
   arm.pixels
   arm.size
   arm.retracted?
   arm.holds
-  
-  
-   
+
+
+
   top-arm.base-height
   bottom-arm.base-height
   left-arm.base-width
 
-  
+
   ratchet0
   ratchet1
   ratchet2
-  
+
   rail.color
   lines0            ; this one is a set
   lines1
   lines2
-  
+
   riggings0
   riggings1
   riggings2
@@ -70,51 +70,51 @@ to globals.setup
   set col.count 10
   set row.count 10
   set col.pixels 60
-  
+
   set arm.pixels 18
   set rail.color blue
-   
-  set col.size (col.pixels / patch.pixels )  
+
+  set col.size (col.pixels / patch.pixels )
   set arm.size (arm.pixels / patch.pixels )
-  
+
   set railTop-height      max-pycor - 2
   set railBottom-height   min-pycor + 2
   set railLeft-width      min-pxcor + 2
-  
+
   set tableTop.height     max-pycor - 6
   set tableBottom.height  min-pycor + 6
   set tableLeft.width     min-pxcor + 6
-  
+
   set floor.height 10
-  
+
   set cmd-stack ""
-  
-  
+
+
   let #expandTR (gen "Tr" col.size)
   let #expandTL (gen "Tl" col.size)
-  
+
   let #expandBR (gen "Br" col.size)
   let #expandBL (gen "Bl" col.size)
-  
+
   let #expandLR (gen "Lr" col.size)
   let #expandLL (gen "Ll" col.size)
-  
+
   let #expandL (gen "l" col.size)
-  
+
   set cmd-rules table:from-list
   (list
-    
+
     (list "TR" (task [cmd-stack.push #expandTR]) )
     (list "TL" (task [cmd-stack.push #expandTL]) )
-    
-    
+
+
     (list "BR" (task [cmd-stack.push #expandBR]) )
     (list "BL" (task [cmd-stack.push #expandBL]) )
-    
+
     (list "LR" (task [cmd-stack.push #expandLR]) )
     (list "LL" (task [cmd-stack.push #expandLL]) )
 
-    
+
     (list "TD" (task [cmd-stack.push (gen "Td" arm.dist-to-top-of-col)]) )
     (list "BD" (task [cmd-stack.push (gen "Bd" arm.dist-to-bottom-of-col)]) )
     (list "LD" (task [cmd-stack.push (gen "Ld" arm.dist-to-left-of-col)]) )
@@ -125,31 +125,31 @@ to globals.setup
     (list "TU" (task [Top.arm.retract])  )
     (list "BU" (task [Bottom.arm.retract])  )
     (list "LU" (task [Left.arm.retract])  )
-;    
-    
+;
+
     ;; bbot controls
     (list "Tr" (task [top.arm.cmd-right]) )
     (list "Tl" (task [top.arm.cmd-left]) )
     (list "Td" (task [top.arm.cmd-down]) )
     (list "Tu" (task [top.arm.cmd-up]) )
-    
+
     (list "Br" (task [bottom.arm.cmd-right]) )
     (list "Bl" (task [bottom.arm.cmd-left]) )
     (list "Bd" (task [bottom.arm.cmd-down]) )
     (list "Bu" (task [bottom.arm.cmd-up]) )
-    
+
     (list "Lr" (task [left.arm.cmd-right]) )
     (list "Ll" (task [left.arm.cmd-left]) )
     (list "Ld" (task [left.arm.cmd-down]) )
     (list "Lu" (task [left.arm.cmd-up]) )
-    
-    
+
+
 
 ;    (list "d" (task [top.arm.cmd-down ]) )
 ;    (list "u" (task [top.arm.cmd-up   ]) )
-    
+
     )
-      
+
 end
 
 
@@ -182,39 +182,39 @@ to patches.setup
   ask patches [ set pcolor grey]
 
   ; table patches
-  
+
   ask patches with [pycor = tableTop.height  and pxcor > tableLeft.width ]
   [ set pcolor 2 ]
-  
+
   ask patches with [pycor = tableBottom.height and pxcor > tableLeft.width]
   [ set pcolor 2 ]
-  
+
   ask patches with [pxcor = tableLeft.width and pycor < tableTop.height + 1 and pycor > tableBottom.height - 1]
   [ set pcolor 2 ]
-  
+
   ;;numbers
 
   ask patches with [(pycor = tableBottom.height - 2) and (pxcor mod col.size) = 2]
   [ set plabel (floor (pxcor / (col.size ) ))
     set plabel-color 1
   ]
-  
+
   ask patches with [(pycor mod col.size) = 2 and (pxcor = tableLeft.width - 2)]
   [ set plabel (floor (pycor / (col.size ) ))
     set plabel-color 1
   ]
-  
-  
+
+
 ;  ask patches with [(pycor = tableTop.height + 2) and (pxcor mod col.size) = 2]
 ;  [ set plabel (floor (pxcor / col.size))
 ;    set plabel-color 1
 ;  ]
-;  
+;
 ;  ask patches with [(pxcor = tableLeft.width - 2) and (pycor mod col.size) = 2]
 ;  [ set plabel (floor (pycor / col.size))
 ;    set plabel-color 1
 ;  ]
-;  
+;
 
 ;  let #i 0
 ;  repeat col.count
@@ -236,9 +236,9 @@ end
 
 to world.set-size
   let #min-px   0
-  let #max-px   col.count * col.size     ;; 
+  let #max-px   col.count * col.size     ;;
   let #min-py   0
-  let #max-py   col.count * col.size     ;; 
+  let #max-py   col.count * col.size     ;;
 
   set-patch-size 10
   resize-world  #min-px #max-px #min-py #max-py
@@ -265,18 +265,18 @@ to rail.setup
       set size 1
     ]
   ]
-  
+
   ;; draw Bottom horizontal rail
-  ask patches with [pycor = railBottom-height ] 
+  ask patches with [pycor = railBottom-height ]
   [
    sprout-rail-bars 1
    [
      set shape "rail3"
      set color black
      set size 1
-   ] 
+   ]
   ]
-  
+
   ;; draw left vertial rail
   ask patches with [pxcor = railLeft-width ]
   [
@@ -284,10 +284,10 @@ to rail.setup
    [
     set shape "rail-line"
     set color black
-    set size 1 
-   ] 
+    set size 1
+   ]
   ]
-  
+
   ;; draw the top ratchet
   let #half-col int (col.size / 2) + 5
   crt 1 ;; the ratchet
@@ -298,9 +298,9 @@ to rail.setup
     set heading 0
     set ratchet0 self
   ]
-  
+
   ;; draw the bottom ratchet
-  
+
 
   crt 1
   [
@@ -311,20 +311,20 @@ to rail.setup
     set heading 37
     set ratchet1 self
   ]
-  
-  
+
+
   ;; draw the left ratchet
 
   crt 1
   [
-   setxy (railLeft-width ) (#half-col) 
+   setxy (railLeft-width ) (#half-col)
    set color rail.color
    set size 3
    set shape "rail-star"
    set heading 37
-   set ratchet2 self 
+   set ratchet2 self
   ]
-  
+
   ;; draw 2 elements between ratchet & arm for Top
   set lines0 (turtle-set nobody)
   foreach [1 2]
@@ -334,7 +334,7 @@ to rail.setup
       set lines0 (turtle-set lines0 self)
     ]
   ]
-  
+
   ;; draw 2 elements between ratchet & arm for bottom
   set lines1 (turtle-set nobody)
   foreach [-1 -2]
@@ -345,19 +345,19 @@ to rail.setup
       set lines1 (turtle-set lines1 self)
     ]
   ]
-  
+
   ;; draw 2 elements between ratchet & arm for left
   set lines2 (turtle-set nobody)
   foreach [-1 -2]
   [ create-rail-lines 1
     [
-      setxy (railLeft-width - ? ) #half-col 
+      setxy (railLeft-width - ? ) #half-col
       init-rail-vertical-line-agent
       set lines2 (turtle-set lines2 self)
     ]
   ]
-  
-  
+
+
   ;; draw the top arm
   set top-arm.base-height (railTop-height - 3)
   create-arms 1
@@ -367,13 +367,13 @@ to rail.setup
     set heading 0
     set shape "pusher"
     rt 90
-  
+
 
     set arm0 self
     set arm.retracted? true
     set arm.holds nobody
   ]
-  
+
   ;; draw the bottom arm
   set bottom-arm.base-height (railBottom-height + 3)
   create-arms 1
@@ -388,9 +388,9 @@ to rail.setup
    set arm.retracted? true
    set arm.holds nobody
   ]
-  
+
   ;; draw the left arm
-  
+
   set left-arm.base-width (railLeft-width + 3)
   create-arms 1
   [
@@ -401,15 +401,15 @@ to rail.setup
    set shape "pusher"
    set arm2 self
    set arm.retracted? true
-   set arm.holds nobody 
+   set arm.holds nobody
   ]
-  
+
   ;; arm + ratchet, etc are grouped as riggings
   ;; for coordinated horizontal movements
   set riggings0 (turtle-set arm0 lines0 ratchet0)
-  
+
   set riggings1 (turtle-set arm1 lines1 ratchet1)
-  
+
   set riggings2 (turtle-set arm2 lines2 ratchet2)
 end
 
@@ -450,7 +450,7 @@ end
 
 ;;Left
 to top.arm.cmd-left
-  arm.move-horiz riggings0 -1 ratchet0  
+  arm.move-horiz riggings0 -1 ratchet0
 end
 
 to bottom.arm.cmd-left
@@ -475,7 +475,7 @@ to arm.move-vertical [#dx]
   [ setxy xcor ( ycor + #dx ) ]
     ask ratchet2 [ rt 30 ]
 end
-  
+
 
 ;; vertical up
 to top.arm.cmd-down
@@ -496,14 +496,14 @@ to arm.vertical.cmd-down [#rat #arm #dy]
   [setxy xcor (ycor - #dy) ]
 end
 
-;; vertical down 
+;; vertical down
 
 to top.arm.cmd-up
   arm.cmd-up ratchet0 arm0 1
 end
 
 to bottom.arm.cmd-up
-  arm.cmd-up ratchet1 arm1 -1  
+  arm.cmd-up ratchet1 arm1 -1
 end
 
 to arm.cmd-up [#rat #arm #dy]
@@ -511,11 +511,11 @@ to arm.cmd-up [#rat #arm #dy]
   ask #arm
   [
    setxy xcor (ycor + #dy)
-   ask rail-lines-here [die] 
+   ask rail-lines-here [die]
   ]
   ask (turtle-set arm.holds)
   [
-     setxy xcor (ycor + #dy)  
+     setxy xcor (ycor + #dy)
   ]
 end
 
@@ -528,7 +528,7 @@ to left.arm.cmd-down
     hatch-rail-lines 1 [init-rail-vertical-line-agent]
     setxy (xcor + 1) ycor
   ]
-  
+
   ;;moving arm
   ask (turtle-set arm.holds)
   [setxy (xcor + 1) ycor ]
@@ -539,33 +539,33 @@ to left.arm.cmd-up
   ask arm2
   [
    setxy (xcor - 1) ycor
-   ask rail-lines-here [die] 
+   ask rail-lines-here [die]
   ]
-  
+
   ;;moving block
   ask (turtle-set arm.holds)
   [
-   setxy (xcor - 1) ycor 
+   setxy (xcor - 1) ycor
   ]
 end
 
 to exec.move-to [#d #col]
-  assert (#col >= 0 and #col < col.count) "trying to move to a column that dosn't exist"
+  assert (#col >= 0 and #col < col.count) "trying to move to a column that doesn't exist"
  ; inform 1 (list "moving to" #col)
- 
+
  let #c 0
- 
+
   ifelse (#d = "B")
   [set #c (#col - Bottom.arm.col )]
-  [ 
+  [
      ifelse (#d = "T")
   [set #c (#col - Top.arm.col )]
   ;;if not top or bottom assume left
   [set #c (#col - Left.arm.col )]
-  
+
     ]
-  
- 
+
+
   ifelse (#c >= 0)
   [ cmd-stack.queue (gen (word #d "R") #c) ]
   [ cmd-stack.queue (gen (word #d "L") (abs #c)) ]
@@ -580,19 +580,19 @@ end
 
 ;=============================================================================================================================================================================================
 ; Reporting distance for Down Method
-;============================================================================================================================================================================================= 
+;=============================================================================================================================================================================================
 
 
-to-report arm.dist-to-top-of-col 
+to-report arm.dist-to-top-of-col
   let #block block.at-top-of Top.arm.col
   let #dist [ycor] of arm0
-  
+
   ifelse (#block = nobody)
   [ set #dist (#dist - floor.height) ]
-  [ set #dist (#dist - ([ycor] of #block) - ([size] of #block) / 2) ]                                                    ;;stop when tuching
-  
+  [ set #dist (#dist - ([ycor] of #block) - ([size] of #block) / 2) ]                                                    ;;stop when touching
 
-  
+
+
   set #dist (#dist - (arm.size / 2) + 1)
   report #dist
 end
@@ -600,12 +600,12 @@ end
 to-report arm.dist-to-bottom-of-col
   let #block block.at-bottom-of Bottom.arm.col
   let #dist [ycor] of arm1
-    
+
   ifelse (#block = nobody)
-  [ set #dist (#dist + ( [ycor] of arm0 - floor.height)) ]  
+  [ set #dist (#dist + ( [ycor] of arm0 - floor.height)) ]
   [ set #dist ([ycor] of #block - [size] of #block / 2) - #dist   ]
-  
-  set #dist (#dist - (arm.size / 2) + 1) 
+
+  set #dist (#dist - (arm.size / 2) + 1)
   report #dist
 end
 
@@ -614,24 +614,24 @@ end
 to-report arm.dist-to-left-of-col
   let #block block.at-left-of Left.arm.col
   let #dist [xcor] of arm2
-  
+
   ifelse (#block = nobody)
   [ set #dist (#dist + ( col.pixels - floor.height))]
   [ set #dist ([xcor] of #block - [size] of #block / 2) - #dist   ]
-  
-  
+
+
   set #dist (#dist - (arm.size / 2) + 1)
   report #dist
-  
+
 end
 
 ;=============================================================================================================================================================================================
 ; Arm Retracting
-;============================================================================================================================================================================================= 
+;=============================================================================================================================================================================================
 
 
 to Top.arm.retract
-  
+
   let #dist top-arm.base-height - ([ycor] of arm0)
   cmd-stack.queue (gen "Tu" #dist)
   cmd-stack.run
@@ -639,7 +639,7 @@ to Top.arm.retract
 end
 
 to Bottom.arm.retract
-  
+
   let #dist [ycor] of arm1 - bottom-arm.base-height
   cmd-stack.queue (gen "Bu" #dist)
   cmd-stack.run
@@ -647,18 +647,18 @@ to Bottom.arm.retract
 end
 
 to Left.arm.retract
-  
-  let #dist [xcor] of arm2 - left-arm.base-width 
+
+  let #dist [xcor] of arm2 - left-arm.base-width
   cmd-stack.queue (gen "Lu" #dist)
   cmd-stack.run
   ask ratchet2 [ set color black ]
 end
-  
+
 ;=============================================================================================================================================================================================
 ; Reporting arm colum
-;============================================================================================================================================================================================= 
+;=============================================================================================================================================================================================
 
-to-report Top.arm.col 
+to-report Top.arm.col
     report int (([xcor] of arm0) / col.size)
 end
 
@@ -711,7 +711,7 @@ end
 
 to cmd-stack.run1
   let #m cmd-stack.pop
-  
+
   ifelse (table:has-key? cmd-rules #m)
   [ run (table:get cmd-rules #m) ]
   [
@@ -721,12 +721,12 @@ to cmd-stack.run1
 end
 
 to-report gen [#str #n]
-  
+
   set #n (int #n)
   ifelse (#n = 0)
   [ report "" ]
   [ report reduce word n-values #n [#str] ]
-end 
+end
 
 
 ;================================================================================================================================================================
@@ -754,18 +754,18 @@ blocks-own
 
 
 to exec.make [#name #size #x #y]
- 
+
  assert (#size <= col.size) "block size too big"
- 
+
  create-blocks 1
  [set block-name #name
-   
+
    set size #size
    set shape "cube"
    set color blue
-   
+
    setxy #x #y
-   
+
    hatch-banners 1
    [ set size 0
      set shape "circle"
@@ -835,33 +835,33 @@ end
 ;================================================================================================================================================================
 
 to pushshape [#arm #col #num]
-  
+
   let #block block.at-top-of #col
-  
+
   exec.move-to #arm #col
-  
+
   cmd-stack.queue (word #arm "D")
   cmd-stack.run
-  
-  arm.hold  convert.arm #arm convert.arm2 #arm #col 
-  
-  
+
+  arm.hold  convert.arm #arm convert.arm2 #arm #col
+
+
   cmd-stack.queue (gen (word #arm "d" ) (#num * col.size))
-  
+
   cmd-stack.run
-      
+
   arm.unhold convert.arm #arm
-  
+
   cmd-stack.queue (word #arm "U")
   cmd-stack.run
-  
-    
+
+
 end
 
 to-report convert.arm [#arm]
-  
+
   let #myarm "A"
-  
+
   ifelse (#arm = "T")
   [set #myarm arm0    ]
   [ifelse (#arm = "B")
@@ -873,9 +873,9 @@ end
 
 
 to-report convert.arm2 [#arm #col]
-  
+
   let #myblock "A"
-  
+
   ifelse (#arm = "T")
   [set #myblock block.at-top-of #col]
   [ifelse (#arm = "B")
@@ -904,7 +904,7 @@ end
 ;================================================================================================================================================================
 ; Extra
 ;================================================================================================================================================================
-  
+
 to-report block.at-top-of [#col]
   report max-one-of (blocks with [ xcor = (col.xcor #col)])
   [ycor]
@@ -919,20 +919,20 @@ to-report block.at-left-of [#col]
   report min-one-of (blocks with [ ycor = (col.xcor #col)])
   [xcor]
 end
-  
- 
+
+
 to-report col.xcor [#col]
   report (#col * col.size) + (int (col.size / 2)) - 1
 end
 
 
-;  
-  
+;
+
 to assert [#x #str]
   if not #x
   [ error (word "assert fails: " #str) ]
 end
-  
+
   ;;block flashing when being maid
 to block-flash [#b]
   repeat 5
@@ -942,21 +942,21 @@ to block-flash [#b]
     ask #b [ st ]
   ]
 end
-  
+
 to setUpShaes
   ;; making the triangles
   exec.move-to "B" 2
-  exec.make1 "t1" "blk-triangl" 5 "blue"
+  exec.make1 "t1" "blk-triangle" 5 "blue"
   exec.move-to "B" 3
-  exec.make1 "t2" "blk-triangl" 5 "green"
+  exec.make1 "t2" "blk-triangle" 5 "green"
   exec.move-to "B" 4
-  exec.make1 "t3" "blk-triangl" 5 "yellow"
+  exec.make1 "t3" "blk-triangle" 5 "yellow"
   exec.move-to "B" 5
-  exec.make1 "t4" "blk-triangl" 5 "red"
-  
+  exec.make1 "t4" "blk-triangle" 5 "red"
+
   exec.move-to "B" 1
   exec.move-to "L" 2
-  
+
   ;; making the circles
   exec.make1 "c1" "blk-circle" 5 "blue"
   exec.move-to "L" 3
@@ -965,7 +965,7 @@ to setUpShaes
   exec.make1 "C3" "blk-circle" 5 "yellow"
   exec.move-to "L" 5
   exec.make1 "C4" "blk-circle" 5 "red"
-  
+
   ;; making the Sqares
   exec.move-to "L" 8
   exec.move-to "B" 2
@@ -976,9 +976,9 @@ to setUpShaes
   exec.make1 "S3" "blk-cube" 5 "yellow"
   exec.move-to "B" 5
   exec.make1 "S4" "blk-cube" 5 "red"
-  
+
 end
-  
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 3
@@ -1486,7 +1486,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.0.4
+NetLogo 5.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -1494,9 +1494,9 @@ NetLogo 5.0.4
 @#$#@#$#@
 default
 0.0
--0.2 0 1.0 0.0
+-0.2 0 0.0 1.0
 0.0 1 1.0 0.0
-0.2 0 1.0 0.0
+0.2 0 0.0 1.0
 link direction
 true
 0
