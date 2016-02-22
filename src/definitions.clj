@@ -91,33 +91,7 @@
 
 
 (def goal-ops
-  '{ :move-x1   ;; a handy multi-move operator when x & y on same s
-     ;     { :name move-x1
-     ;       :achieves (on ?x ?y)
-     ;       :when ((isa ?x ?_) (at ?x ?s) (at ?y ?s))
-     ;       :post ((protected ?s [on ?x ?y]) (holds ?x) (on ?x ?y))
-     ;       :del ((protected ?s [on ?x ?y]) )
-     ;       }
-     { :name move-x1
-       :achieves (on ?x ?y)
-       :when ((isa ?x ?_) (at ?x ?s) (at ?y ?s))
-       :post ((clearspace ?x) (on ?x ?y))
-       }
-
-     :move-x   ;; a handy multi-move operator
-     { :name move-x
-       :achieves (on ?x ?y)
-       :when ((isa ?x ?_) (at ?x ?sx) (at ?y ?sy) )
-       :post ((protected ?sx [on ?x ?y]) (protected ?sy [on ?x ?y])
-               (cleartop ?x) (cleartop ?y) )
-       :pre ((on ?x ?ox) )
-       :del ((at ?x ?sx)  (on ?x ?ox) (cleartop ?y)
-              (protected ?sx [on ?x ?y]) (protected ?sy [on ?x ?y]) )
-       :add ((at ?x ?sy) (on ?x ?y) (cleartop ?ox))
-       :cmd ((push-from ?sx) (push-to ?sy) )
-       :txt ((mv-push ?x off ?ox at ?sx)
-              (mv-push ?x on ?y at ?sy) )
-       }
+  '{
 
      :move-top-to
      {
@@ -128,7 +102,7 @@
        :pre  ((:not (at tp ?x)))
        :del  ((at tp ?y))
        :add  ((at tp ?x))
-       :cmd  ((exec.move-to "T" ?y))
+       :cmd  ((move-arm "T" ?y))
        :txt  ((move top pusher to ?x))
        }
 
@@ -141,7 +115,7 @@
        :pre  ((:not (at sp ?x)))
        :del  ((at sp ?y))
        :add  ((at sp ?x))
-       :cmd  ((exec.move-to "L" ?y))
+       :cmd  ((move-arm "L" ?y))
        :txt  ((move side pusher to ?x))
        }
 
@@ -154,7 +128,7 @@
        :pre  ((:not (at bp ?x)))
        :del  ((at bp ?y))
        :add  ((at bp ?x))
-       :cmd  ((exec.move-to "B" ?y))
+       :cmd  ((move-arm "B" ?y))
        :txt  ((move bottom pusher to ?x))
        }
 
