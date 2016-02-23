@@ -8,7 +8,7 @@
 
 (defn ops-search
   [start goal ops & {:keys [world debug]
-                     :or {debug  false
+                     :or {debug  true
                           world  #{}}}]
   ; using sets for state tuples...
   (let [start {:state (set start) :path () :cmds () :txt ()}

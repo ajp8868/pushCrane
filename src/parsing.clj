@@ -398,12 +398,15 @@
 ; block-data
 ;================================
 
-(def no-columns 8)
+(def no-columns 9)
 
 (defn gen-column-names [n]
   (map #(symbol (str/join (list "c" (str %))))
     (range n)))
 
+(defn gen-vertical-column-names [n]
+  (map #(symbol (str/join (list "vc" (str %))))
+    (range n)))
 
 
 (defn gen-column-tuples [c-names]
@@ -412,6 +415,15 @@
       (for [c c-names]
         (with-mvars {'c c}
           (mout '((column ?c) (at ?c ?c)))
+          )))
+    ))
+
+(defn gen-vertical-column-tuples [vc-names]
+  (into #{}
+    (reduce concat
+      (for [vc vc-names]
+        (with-mvars {'vc vc}
+          (mout '((column ?vc) (at ?vc ?vc)))
           )))
     ))
 
@@ -430,7 +442,10 @@
 
 
 (def block-data (atom #{}))
+(def goal-data (atom #{}))
 
+
+;;Block-Data/World Methods
 (defn bd-set! [data]
   (set-atom! block-data data))
 
@@ -447,9 +462,36 @@
   (ui-out :dbg 'resetting 'block-data)
   (set-atom! block-data #{})
   (bd-add! (gen-column-tuples (gen-column-names no-columns)))
-  (bd-add! '#{(hand empty)})
+  (bd-add! (gen-vertical-column-tuples (gen-vertical-column-names no-columns)))
+  (bd-add! '#{(isa arm192 x-mover)})
+  (bd-add! '#{(isa arm193 x-mover)})
+  (bd-add! '#{(isa arm194 y-mover)})
   (ui-set :bdat @block-data)
   @block-data
+  )
+
+
+;;Goal Data Methods
+(defn gd-set! [data]
+  (set-atom! goal-data data))
+
+(defn gd-add! [tuples]
+  (set-atom! goal-data (union @goal-data (set tuples)))
+  )
+
+(defn gd-del! [tuples]
+  (set-atom! goal-data (difference @goal-data (set tuples))))
+
+
+(defn clear-goal-data []
+  (reset-block-numbering)
+  (ui-out :dbg 'resetting 'goal-data)
+  (set-atom! goal-data #{})
+  (gd-add! '#{(at arm192 '(c5 vc9))})
+  (gd-add! '#{(at arm193 '(c1 vc1))})
+  (gd-add! '#{(at arm194 '(c1 vc1))})
+  (ui-set :bdat @goal-data)
+  @goal-data
   )
 
 

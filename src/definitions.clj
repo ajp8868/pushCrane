@@ -102,7 +102,7 @@
        :pre  ((:not (at tp ?x)))
        :del  ((at tp ?y))
        :add  ((at tp ?x))
-       :cmd  ((move-arm "T" ?y))
+       :cmd  ((move-arm "T" ?x))
        :txt  ((move top pusher to ?x))
        }
 
@@ -115,7 +115,7 @@
        :pre  ((:not (at sp ?x)))
        :del  ((at sp ?y))
        :add  ((at sp ?x))
-       :cmd  ((move-arm "L" ?y))
+       :cmd  ((move-arm "L" ?x))
        :txt  ((move side pusher to ?x))
        }
 
@@ -128,57 +128,41 @@
        :pre  ((:not (at bp ?x)))
        :del  ((at bp ?y))
        :add  ((at bp ?x))
-       :cmd  ((move-arm "B" ?y))
+       :cmd  ((move-arm "B" ?x))
        :txt  ((move bottom pusher to ?x))
-       }
-
-     :clearspace
-     { :name clearspace
-       :achieves (clearspace ?x)
-       :when ((on ?z ?x) (at ?z ?c))
-       :post ( (clearspace ?z) )
-       :pre  ((column ?new)
-               (at ?y ?new)  (clearspace ?y) )
-       :del ( (at ?x ?c) (at ?x ?y) )
-       :add ((clearspace ?x) (at ?z ?new) (on ?z ?y)    )
-       :cmd ((push-from ?c) (push-to ?new) )
-       :txt ((ct-push ?z off ?x at ?c)
-              (ct-push ?z on ?y at ?new) )
        }
 
      :push-up
      { :name push-up
        :achieves (at ?x middle)
-       :when ((isa ?x ?_) (at ?x bottom) (at ?x ?c))
-       :pre  ((at ?bp ?c) (clearspace middle)  )
-       :del  ((at ?x bottom) (clearspace ?y) )
-       :add  ((at ?x ?c) (clearspace ?x))
-       :cmd  ((push-up ?c) )
-       :txt  ((push-up ?x to middle) )
+       :when ((isa ?x ?_) (at bp ?c) (at ?x bottom))
+       :pre  ((at ?tp ?c) (clearspace middle)  )
+       :del  ((at ?x ?c) (at ?x bottom))
+       :add  ((at ?x middle) )
+       :cmd  ((push-up bp))
+       :txt  ((push-up ?x to middle))
        }
 
      :push-down
      { :name push-down
        :achieves (at ?x middle)
-       :when ((isa ?x ?_) (at ?x ?c) (at ?x top))
-       :post ((clearspace ?x))
+       :when ((isa ?x ?_) (at tp ?c) (at ?x top))
        :pre  ((at ?tp ?c) (clearspace middle)  )
-       :del  ((at ?x ?c) (at ?x top) (clearspace ?y))
-       :add  ((clearspace ?y) )
-       :cmd  ((push-down ?c))
+       :del  ((at ?x ?c) (at ?x top))
+       :add  ((at ?x middle) )
+       :cmd  ((push-down tp))
        :txt  ((push-down ?x to middle))
        }
 
      :push-across
      { :name push-across
        :achieves (at ?x middle)
-       :when ((isa ?x ?_) (at ?x ?c) (at ?x left))
-       :post ((clearspace ?y)(at ?x middle))
-       :pre  ((at ?lp ?c) (clearspace middle)  )
-       :del  ((holds ?x) (cleartop ?y) (protected ?s [on ?x ?y]))
-       :add  ((at ?x ?s) (on ?x ?y) (hand empty) (cleartop ?x))
-       :cmd  ((push-to ?s) )
-       :txt  ((push ?x on ?y at ?s) )
+       :when ((isa ?x ?_) (at tp ?c) (at ?x left))
+       :pre  ((at ?tp ?c) (clearspace middle)  )
+       :del  ((at ?x ?c) (at ?x left))
+       :add  ((at ?x middle) )
+       :cmd  ((push-across lp))
+       :txt  ((push-across ?x to middle))
        }
 
      :protect-x
@@ -195,20 +179,34 @@
 
 (def exec-ops
   '{ push-up
-     { :pre ( (at ?p ?c)
+     { :pre ((at ?p ?c)
+              (isa ?p horse)
               )
        :txt (pushing up at column ?c)
-       :cmd (pick-from ?s)
+       :cmd (push-up ?s)
        }
-     move-arm
-     { :pre ( (hand retracted)
-              )
-       :del ( (at ?p ?c)
+     move-arm-x
+     { :pre ( (retracted ?p)
+              (arm ?p)
+              (at ?oc)
               )
        :add ( (at ?p ?c)
               )
+       :del ( (at ?p ?oc)
+              )
        :txt (Moving ?p to ?c)
        :cmd (move-pusher ?p ?c)
+       }
+     move-arm-y
+     { :pre ( (is retracted)
+              (isa y-mover)
+              )
+       :add ( (at ?p ?vc)
+              )
+       :del ((at ?p ?voc)
+              )
+       :txt (Moving ?p to ?vc)
+       :cmd (move-pusher ?p ?vc)
        }
      push-down
      { :pre ( (holds ?x)
@@ -331,10 +329,38 @@
     ((make ?nam ?obj ?size ?color)
       :=> (str 'exec.make (str-qt (? nam)) (str-qt (? obj))
             ((? size) sizes) (str-qt (? color))))
+
     ((move-to ?s)   :=> (str 'exec.move-to sp (stack-no (? s))))
+
     ((drop-at ?s)   :=> (str 'exec.drop-at sp (stack-no (? s))))
+
     ((push ?s) :=> (str 'exec.pick-from sp (stack-no (? s))))
-    ((move-pusher ?p ?c) :=> (str 'exec.move sp str-qt (? p) sp (? c)))
+
+    ((move-pusher ?p ?c) :=> (str 'exec.move sp str-qt (? p) sp (? c) str-qt))
+
     ( ?_            :=> (ui-out :dbg 'ERROR '(unknown NetLogo cmd)))
     ))
+
+
+;=============================
+;Test States
+;=============================
+(def world
+  '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)
+     (arm arm192)(arm arm193)(arm arm194)
+     })
+
+(def startState
+  '#{(at arm192 c1)
+     (at arm193 c1)
+     (at arm194 c1)
+     (retracted arm192)
+     (retracted arm193)
+     (retracted arm194)
+     })
+
+(def goalState
+  '#{(at arm192 c5)
+     })
+
 

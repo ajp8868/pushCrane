@@ -1,3 +1,4 @@
+(load-file "src/trace.clj")
 (load-file "src/matcher.clj")
 (load-file "src/ops-search.clj")
 (load-file "src/wrappers.clj")
@@ -8,5 +9,5 @@
 
 (println "Imports Completed")
 
-(startup 2225)
+(startup 2226)
 
