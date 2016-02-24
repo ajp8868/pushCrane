@@ -178,22 +178,24 @@
 
 
 (def exec-ops
-  '{ push-up
-     { :pre ((at ?p ?c)
-              (isa ?p horse)
-              )
-       :txt (pushing up at column ?c)
-       :cmd (push-up ?s)
-       }
-     move-arm-x
-     { :pre ( (arm ?p)
+  '{ move-arm-x
+     { :name move-arm-x
+       :achieves ((at ?p ?c))
+       :when ( (arm ?p)
+               (retracted ?p)
+               (column ?c)
+               (at ?p ?oc)
+               (direction ?p x)
+               (nlogo-name ?p ?name)
+               )
+       :pre ( (arm ?p)
               (retracted ?p)
               (column ?c)
-              (at ?p ?c2)
+              (at ?p ?oc)
               (direction ?p x)
               (nlogo-name ?p ?name)
               )
-       :del ( (at ?p ?c2)
+       :del ( (at ?p ?oc)
               )
        :add ( (at ?p ?c)
               )
@@ -201,79 +203,86 @@
        :cmd ((move-pusher ?name ?c) )
        }
      move-arm-y
-     { :pre ( (arm ?p)
+     { :name move-arm-y
+       :achieves ((at ?p ?c))
+       :when ( (arm ?p)
+               (retracted ?p)
+               (column ?c)
+               (at ?p ?oc)
+               (direction ?p y)
+               (nlogo-name ?p ?name)
+               )
+       :pre ( (arm ?p)
               (retracted ?p)
               (column ?c)
-              (at ?p ?c2)
+              (at ?p ?oc)
               (direction ?p y)
               (nlogo-name ?p ?name)
               )
-       :del ( (at ?p ?c2)
+       :del ( (at ?p ?oc)
               )
        :add ( (at ?p ?c)
               )
        :txt (Moving vertical pusher ?p to ?c)
        :cmd ((move-pusher ?name ?c))
        }
-     push-down
-     { :pre ( (holds ?x)
-              (at ?dst ?s)
-              (cleartop ?dst)
+     push-up
+     { :name push-up
+       :achieves ((y ?s ?y))
+       :when ( (column ?c)
+               (column ?y)
+               (shape ?s)
+               (canpush ?p bottomshapes)
+               (y ?s ?oy)
+               (x ?s ?c)
+               (at ?p ?c)
+               (nlogo-name ?p ?name))
+
+       :pre ( (column ?c)
+              (column ?y)
+              (shape ?s)
+              (canpush ?p bottomshapes)
+              (y ?s ?oy)
+              (x ?s ?c)
+              (at ?p ?c)
+              (nlogo-name ?p ?name)
               )
-       :del ( (holds ?x)
-              (cleartop ?dst)
+       :del ( (y ?s ?oy)
               )
-       :add ( (hand empty)
-              (on ?x ?dst)
-              (at ?x ?s)
-              (cleartop ?x)
+       :add ( (y ?s ?y)
               )
-       :txt (put! ?x on ?dst at ?s)
-       :cmd (drop-at ?s)
+       :txt (pushing up at column ?c from ?oy)
+       :cmd ((push-shape ?name ?c ?y))
        }
-     push-across
-     { :pre ( (holds ?x)
-              (at ?dst ?s)
-              (cleartop ?dst)
-              )
-       :del ( (holds ?x)
-              (cleartop ?dst)
-              )
-       :add ( (hand empty)
-              (on ?x ?dst)
-              (at ?x ?s)
-              (cleartop ?x)
-              )
-       :txt (put! ?x on ?dst at ?s)
-       :cmd (drop-at ?s)
-       }
-     create
-     { :pre ( (hand empty) )
-       :del ( (hand empty) )
-       :add ( (isa  ?x ?isa)
-              (size ?x ?size)
-              (color ?x ?color)
-              (holds ?x)
-              )
-       :txt (make! ?x ?isa size= ?size color= ?color)
-       :cmd (make ?x ?isa ?size ?color)
-       }
-     dispose
-     { :pre ( (holds ?x)        (isa ?x ?obj)
-              (color ?x ?color) (size ?x ?size)
-              )
-       :del ( (holds ?x) (cleartop ?x) (isa ?x ?obj)
-              (color ?x ?color) (size ?x ?size)
-              )
-       :add ( (hand empty) )
-       :txt (dispose! ?x)
-       :cmd (dispose)
-       }})
+      push-right
+       { :name push-right
+         :achieves ((x ?s ?x))
+         :when ((column ?c)
+                 (column ?x)
+                 (shape ?s)
+                 (canpush ?p sideshapes)
+                 (x ?s ?ox)
+                 (y ?s ?c)
+                 (at ?p ?c)
+                 (nlogo-name ?p ?name))
+         :pre ( (column ?c)
+                (column ?x)
+                (shape ?s)
+                (canpush ?p sideshapes)
+                (x ?s ?ox)
+                (y ?s ?c)
+                (at ?p ?c)
+                (nlogo-name ?p ?name)
+                )
+         :del ( (x ?s ?ox)
+                )
+         :add ( (x ?s ?x)
+                )
+         :txt (pushing right at column ?c from ?ox)
+         :cmd ((push-shape ?name ?c ?x))
+         }
 
-
-
-
-
+    })
 
 
 
@@ -281,9 +290,12 @@
 ;World States
 ;=============================
 (def world
-  '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)
-     (at c1 c1)(at c2 c2)(at c3 c3)(at c4 c4)(at c5 c5)(at c6 c6)(at c7 c7)
-     (connects c1 c2)(connects c2 c3)(connects c3 c4)(connects c4 c5)(connects c5 c6)(connects c6 c7)
+  '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)(column c8)(column c9)
+     (at c1 c1)(at c2 c2)(at c3 c3)(at c4 c4)(at c5 c5)(at c6 c6)(at c7 c7)(at c8 c8)(at c9 c9)
+     (row r1)(row r2)(row r3)(row r4)(row r5)(row r6)(row r7)(row r8)(row r9)
+     (canpush arm194 sideshapes)
+     (canpush arm193 bottomshapes)
+     (canpush arm192 topshapes)
      (arm arm192)(arm arm193)(arm arm194)
      (direction arm192 x)
      (direction arm193 x)
@@ -300,14 +312,59 @@
      (retracted arm192)
      (retracted arm193)
      (retracted arm194)
+     (shape t1)
+     (shape t2)
+     (shape t3)
+     (x t1 c2)
+     (x t2 c3)
+     (x t3 c4)
+     (y t1 c1)
+     (y t2 c1)
+     (y t3 c1)
      })
 
 (def goalState
-  '#{(at arm192 c5)
-     (at arm194 c6)
-     (at arm193 c7)
+  '#{
+     ;(at arm192 c5)
+     ;(at arm193 c8)
+     ;(at arm194 c4)
+     (y t1 c4)
+     (x t1 c7)
+     ;(shapeloc t3 middle)
      })
 
+
+(def plannerStartState
+  '#{((column c1) (column c2) (column c3) (column c4) (column c5) (column c6) (column c7) (column c8) (column c9)
+       (at c1 c1) (at c2 c2) (at c3 c3) (at c4 c4) (at c5 c5) (at c6 c6) (at c7 c7) (at c8 c8) (at c9 c9)
+       (row r1) (row r2) (row r3) (row r4) (row r5) (row r6) (row r7) (row r8) (row r9)
+       (canpush arm194 sideshapes)
+       (canpush arm193 bottomshapes)
+       (canpush arm192 topshapes)
+       (arm arm192) (arm arm193) (arm arm194)
+       (direction arm192 x)
+       (direction arm193 x)
+       (direction arm194 y)
+       (nlogo-name arm192 T)
+       (nlogo-name arm193 B)
+       (nlogo-name arm194 L)
+       (at arm192 c1)
+       (at arm193 c1)
+       (at arm194 c1)
+       (retracted arm192)
+       (retracted arm193)
+       (retracted arm194)
+       (shape t1)
+       (shape t2)
+       (shape t3)
+       (x t1 c2)
+       (x t2 c3)
+       (x t3 c4)
+       (y t1 c1)
+       (y t2 c1)
+       (y t3 c1)
+       )}
+  )
 
 
 
@@ -327,6 +384,7 @@
   ((grasp ?x)        :=> (set-atom! it-reference (? x))   (goal (mout '(holds ?x))))
 
   ((move-pusher-to ?p ?c) :=> (apply-op 'at (mout '(?p sp ?c)) world))
+  ((push-shape-to ?op ?c ?sn) :=> (apply-op (mout '(?op)) (mout '(?sn sp ?c)) world))
 
   ;((move-pusher-to ?p ?c) :=> (apply-exec ('move-arm exec-ops) (mout '{?p ?c})))
 
@@ -375,20 +433,37 @@
     ;((push ?s) :=> (str 'exec.pick-from sp (stack-no (? s))))
 
     ((move-pusher ?p ?c) :=> (str 'exec.move-to (str-qt (? p)) (column-no(? c))))
+    ((push-shape ?p ?c ?s) :=> (str 'pushshape (str-qt (? p)) (column-no(? c)) sp (column-no(? s))))
 
     ( ?_            :=> (ui-out :dbg 'ERROR '(unknown NetLogo cmd)))
     ))
 
+
+;=======================================
+; Test Commands
+;=======================================
+
 (defn command-caller [cmds]
   (if (not (empty? cmds))
     (do
+      (print cmds)
       (nlogo-send-exec (first (first cmds)))
       (command-caller (rest cmds)))
+    (println "finished")
     )
   )
 
 (defn test1 []
+  (nlogo-send "startup")
+  (nlogo-send "setUpShapes")
     (command-caller (:cmds (ops-search startState goalState exec-ops :world world)
                            ))
+  )
+
+(defn test2 []
+  (nlogo-send "startup")
+  (nlogo-send "setUpShapes")
+  (command-caller (:cmds (planner plannerStartState goalState exec-ops)
+                         ))
   )
 

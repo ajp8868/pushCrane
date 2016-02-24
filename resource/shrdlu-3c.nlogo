@@ -943,7 +943,7 @@ to block-flash [#b]
   ]
 end
 
-to setUpShaes
+to setUpShapes
   ;; making the triangles
   exec.move-to "B" 2
   exec.make1 "t1" "blk-triangle" 5 "blue"
@@ -978,7 +978,6 @@ to setUpShaes
   exec.make1 "S4" "blk-cube" 5 "red"
 
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 3
@@ -1051,7 +1050,7 @@ INPUTBOX
 714
 121
 port-num
-2225
+2226
 1
 0
 Number
@@ -1080,7 +1079,7 @@ BUTTON
 216
 NIL
 exec.repl
-NIL
+T
 1
 T
 OBSERVER
@@ -1154,7 +1153,7 @@ false
 Rectangle -16777216 true false 0 0 300 300
 Rectangle -7500403 true true 15 15 285 285
 
-blk-triangl
+blk-triangle
 false
 0
 Polygon -16777216 true false 150 0 300 300 0 300
