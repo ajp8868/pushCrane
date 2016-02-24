@@ -186,27 +186,34 @@
        :cmd (push-up ?s)
        }
      move-arm-x
-     { :pre ( (retracted ?p)
-              (arm ?p)
-              (at ?oc)
+     { :pre ( (arm ?p)
+              (retracted ?p)
+              (column ?c)
+              (at ?p ?c2)
+              (direction ?p x)
+              (nlogo-name ?p ?name)
+              )
+       :del ( (at ?p ?c2)
               )
        :add ( (at ?p ?c)
               )
-       :del ( (at ?p ?oc)
-              )
-       :txt (Moving ?p to ?c)
-       :cmd (move-pusher ?p ?c)
+       :txt (Moving horizontal pusher ?p to ?c)
+       :cmd ((move-pusher ?name ?c) )
        }
      move-arm-y
-     { :pre ( (is retracted)
-              (isa y-mover)
+     { :pre ( (arm ?p)
+              (retracted ?p)
+              (column ?c)
+              (at ?p ?c2)
+              (direction ?p y)
+              (nlogo-name ?p ?name)
               )
-       :add ( (at ?p ?vc)
+       :del ( (at ?p ?c2)
               )
-       :del ((at ?p ?voc)
+       :add ( (at ?p ?c)
               )
-       :txt (Moving ?p to ?vc)
-       :cmd (move-pusher ?p ?vc)
+       :txt (Moving vertical pusher ?p to ?c)
+       :cmd ((move-pusher ?name ?c))
        }
      push-down
      { :pre ( (holds ?x)
@@ -270,7 +277,36 @@
 
 
 
+;=============================
+;World States
+;=============================
+(def world
+  '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)
+     (at c1 c1)(at c2 c2)(at c3 c3)(at c4 c4)(at c5 c5)(at c6 c6)(at c7 c7)
+     (connects c1 c2)(connects c2 c3)(connects c3 c4)(connects c4 c5)(connects c5 c6)(connects c6 c7)
+     (arm arm192)(arm arm193)(arm arm194)
+     (direction arm192 x)
+     (direction arm193 x)
+     (direction arm194 y)
+     (nlogo-name arm192 T)
+     (nlogo-name arm193 B)
+     (nlogo-name arm194 L)
+     })
 
+(def startState
+  '#{(at arm192 c1)
+     (at arm193 c1)
+     (at arm194 c1)
+     (retracted arm192)
+     (retracted arm193)
+     (retracted arm194)
+     })
+
+(def goalState
+  '#{(at arm192 c5)
+     (at arm194 c6)
+     (at arm193 c7)
+     })
 
 
 
@@ -290,7 +326,9 @@
 (defmatch process-cmd []
   ((grasp ?x)        :=> (set-atom! it-reference (? x))   (goal (mout '(holds ?x))))
 
-  ((move-pusher-to ?p ?c) :=> (apply-exec ('move-arm exec-ops) (mout '{?p ?c})))
+  ((move-pusher-to ?p ?c) :=> (apply-op 'at (mout '(?p sp ?c)) world))
+
+  ;((move-pusher-to ?p ?c) :=> (apply-exec ('move-arm exec-ops) (mout '{?p ?c})))
 
 
 
@@ -321,7 +359,7 @@
       sp    " "
       qt    "\""
       str-qt   (fn[x] (str " \"" x "\" "))    ; wrap x in quotes
-      stack-no (fn[x] (apply str (rest (str x))))   ; strip "s" of stack name
+      column-no (fn[x] (apply str (rest (str x))))   ; strip "s" of stack name
       ]
 
 
@@ -330,37 +368,27 @@
       :=> (str 'exec.make (str-qt (? nam)) (str-qt (? obj))
             ((? size) sizes) (str-qt (? color))))
 
-    ((move-to ?s)   :=> (str 'exec.move-to sp (stack-no (? s))))
+    ;((move-to ?s)   :=> (str 'exec.move-to sp (stack-no (? s))))
 
-    ((drop-at ?s)   :=> (str 'exec.drop-at sp (stack-no (? s))))
+    ;((drop-at ?s)   :=> (str 'exec.drop-at sp (stack-no (? s))))
 
-    ((push ?s) :=> (str 'exec.pick-from sp (stack-no (? s))))
+    ;((push ?s) :=> (str 'exec.pick-from sp (stack-no (? s))))
 
-    ((move-pusher ?p ?c) :=> (str 'exec.move sp str-qt (? p) sp (? c) str-qt))
+    ((move-pusher ?p ?c) :=> (str 'exec.move-to (str-qt (? p)) (column-no(? c))))
 
     ( ?_            :=> (ui-out :dbg 'ERROR '(unknown NetLogo cmd)))
     ))
 
+(defn command-caller [cmds]
+  (if (not (empty? cmds))
+    (do
+      (nlogo-send-exec (first (first cmds)))
+      (command-caller (rest cmds)))
+    )
+  )
 
-;=============================
-;Test States
-;=============================
-(def world
-  '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)
-     (arm arm192)(arm arm193)(arm arm194)
-     })
-
-(def startState
-  '#{(at arm192 c1)
-     (at arm193 c1)
-     (at arm194 c1)
-     (retracted arm192)
-     (retracted arm193)
-     (retracted arm194)
-     })
-
-(def goalState
-  '#{(at arm192 c5)
-     })
-
+(defn test1 []
+    (command-caller (:cmds (ops-search startState goalState exec-ops :world world)
+                           ))
+  )
 
