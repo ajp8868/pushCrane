@@ -1,43 +1,3 @@
-
-;===================================================
-; based on: strips-search.clj from SHRDLU model
-; naming changes only
-;===================================================
-
-
-;these operators can have all of these slots...
-;{ :name put-on
-;  :achieves (on ?x ?y)
-;  :when   ( (at ?x ?sx) (at ?y ?sy) (:guard (not= (? sx) (? sy))) )
-;  :post   ( (protected ?sx) (protected ?sy)
-;            (cleartop ?x)
-;            (cleartop ?y)
-;            (hand empty) )
-;  :pre ()
-;  :del ( (at ?x ?sx)
-;         (cleartop ?y)
-;         (protected ?sx)
-;         (protected ?sy) )
-;  :add ( (at ?x ?sy)
-;         (on ?x ?y) )
-;  :cmd ( (pick-from ?sx)
-;         (drop-at ?sy) )
-;  :txt (put ?x on ?y)
-;  }
-;
-;NB: in this example the ops have unique :achieves + :when
-;
-;They are processed as follows...
-;
-;goal <- (pop goal-stack)
-;match (:achieves op) goal
-;  match (:when op) BD
-;    push( expand op , goal-stack )
-;    push-all( expand (:post op), goal-stack )
-
-
-
-
 (defn print-goals [q]
   (if (not (empty? q))
     (do
@@ -52,15 +12,21 @@
 
 (def goalq (atom (java.util.concurrent.LinkedBlockingDeque.)))
 
+(defn ui-out [tag msg & r]
+  (println tag \tab msg r))
 
 (declare strips-loop update-path
   goal-mop-apply apply-goal-op)
+;
+;(defn planner [state goal goal-ops]
+;  (.clear @goalq)
+;  (.push @goalq goal)
+;  (strips-loop {:state state, :cmds nil, :txt nil} goal-ops 60))
 
 (defn planner [state goal goal-ops]
   (.clear @goalq)
-  (.push @goalq goal)
+  (doseq [p goal] (.push @goalq p))
   (strips-loop {:state state, :cmds nil, :txt nil} goal-ops 60))
-
 
 (defn strips-loop
   [path goal-ops limit]
@@ -75,7 +41,7 @@
       (map? goal) ;; it is a partially matched op
       (do
         (ui-out :dbg '** 'APPLYING (:name goal) '=> (:achieves goal))
-       ; (ui-out :dbg '** (:add goal))
+        ; (ui-out :dbg '** (:add goal))
         (recur
           (update-path path (goal-mop-apply (:state path) goal))
           goal-ops (dec limit))
@@ -85,7 +51,7 @@
       (not (contains? (:state path) goal))
       (do (ui-out :dbg 'solving goal)
         (some (partial apply-goal-op (:state path) goal)
-              (vals goal-ops))
+          (vals goal-ops))
         (recur path goal-ops (dec limit))
         )
       ;; else it is an existing fact
@@ -100,7 +66,7 @@
 (defn goal-mop-apply [bd mop]
   (mfind* [(:pre mop) bd]
     (ui-out :dbg '** (mout (:add mop)))
-   ; (ui-out :dbg '=> (mout mop))
+    ; (ui-out :dbg '=> (mout mop))
     {:state (union (mout (:add mop))
               (difference bd (mout (:del mop))))
      :cmd   (mout (:cmd mop))
@@ -110,7 +76,7 @@
 
 
 (defn apply-goal-op [bd goal op]
-  ;(println (list 'trying (:name op)))
+  (println (list 'trying (:name op)))
   (mlet [(:achieves op) goal]
 
     (mfind* [(:when op) bd]
@@ -134,8 +100,3 @@
     :cmds  (concat (:cmds current) (:cmd newp)),
     :txt   (concat (:txt current) (:txt newp))
     })
-
-
-
-
-

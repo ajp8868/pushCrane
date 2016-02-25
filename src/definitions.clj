@@ -284,6 +284,117 @@
 
     })
 
+;====================================
+; Planner Operators
+;====================================
+
+(def planner-ops
+  '{ :move-arm-x
+     { :name move-arm-x
+       :achieves ((at ?p ?c))
+       :when ( (arm ?p)
+               (retracted ?p)
+               (column ?c)
+               (at ?p ?oc)
+               (direction ?p x)
+               (nlogo-name ?p ?name)
+               )
+       :pre ( (arm ?p)
+              (retracted ?p)
+              (column ?c)
+              (at ?p ?oc)
+              (direction ?p x)
+              (nlogo-name ?p ?name)
+              )
+       :del ( (at ?p ?oc)
+              )
+       :add ( (at ?p ?c)
+              )
+       :txt (Moving horizontal pusher ?p to ?c)
+       :cmd ((move-pusher ?name ?c) )
+       }
+     :move-arm-y
+     { :name move-arm-y
+       :achieves ((at ?p ?c))
+       :when ( (arm ?p)
+               (retracted ?p)
+               (column ?c)
+               (at ?p ?oc)
+               (direction ?p y)
+               (nlogo-name ?p ?name)
+               )
+       :pre ( (arm ?p)
+              (retracted ?p)
+              (column ?c)
+              (at ?p ?oc)
+              (direction ?p y)
+              (nlogo-name ?p ?name)
+              )
+       :del ( (at ?p ?oc)
+              )
+       :add ( (at ?p ?c)
+              )
+       :txt (Moving vertical pusher ?p to ?c)
+       :cmd ((move-pusher ?name ?c))
+       }
+     :push-up
+     { :name push-up
+       :achieves ((y ?s ?y))
+       :when ( (column ?c)
+               (column ?y)
+               (shape ?s)
+               (canpush ?p bottomshapes)
+               (y ?s ?oy)
+               (x ?s ?c)
+               (at ?p ?c)
+               (nlogo-name ?p ?name))
+
+       :pre ( (column ?c)
+              (column ?y)
+              (shape ?s)
+              (canpush ?p bottomshapes)
+              (y ?s ?oy)
+              (x ?s ?c)
+              (at ?p ?c)
+              (nlogo-name ?p ?name)
+              )
+       :del ( (y ?s ?oy)
+              )
+       :add ( (y ?s ?y)
+              )
+       :txt (pushing up at column ?c from ?oy)
+       :cmd ((push-shape ?name ?c ?y))
+       }
+     :push-right
+     { :name push-right
+       :achieves ((x ?s ?x))
+       :when ((column ?c)
+               (column ?x)
+               (shape ?s)
+               (canpush ?p sideshapes)
+               (x ?s ?ox)
+               (y ?s ?c)
+               (at ?p ?c)
+               (nlogo-name ?p ?name))
+       :pre ( (column ?c)
+              (column ?x)
+              (shape ?s)
+              (canpush ?p sideshapes)
+              (x ?s ?ox)
+              (y ?s ?c)
+              (at ?p ?c)
+              (nlogo-name ?p ?name)
+              )
+       :del ( (x ?s ?ox)
+              )
+       :add ( (x ?s ?x)
+              )
+       :txt (pushing right at column ?c from ?ox)
+       :cmd ((push-shape ?name ?c ?x))
+       }
+
+     })
+
 
 
 ;=============================
@@ -463,7 +574,7 @@
 (defn test2 []
   (nlogo-send "startup")
   (nlogo-send "setUpShapes")
-  (command-caller (:cmds (planner plannerStartState goalState exec-ops)
+  (command-caller (:cmds (planner plannerStartState '(y t3 5) planner-ops)
                          ))
   )
 
