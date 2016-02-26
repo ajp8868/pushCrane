@@ -1,4 +1,4 @@
- (ns ops-search2)
+(ns ops-search2)
 
 (def ops2
   '{pushTop {:pre ( (block ?block)

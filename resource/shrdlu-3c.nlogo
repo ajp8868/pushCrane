@@ -945,8 +945,8 @@ end
 
 to setUpShapes
   ;; making the triangles
-  exec.move-to "B" 2
-  exec.make1 "t1" "blk-triangle" 5 "blue"
+  ;exec.move-to "B" 2
+  ;exec.make1 "t1" "blk-triangle" 5 "blue"
   exec.move-to "B" 3
   exec.make1 "t2" "blk-triangle" 5 "green"
   exec.move-to "B" 4

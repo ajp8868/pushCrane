@@ -4,8 +4,8 @@
 
 (def settings
   {
-    ;;:search-type :breadth-first
-    :search-type :strips
+    :search-type :breadth-first
+    ;:search-type :strips
     })
 
 
@@ -180,14 +180,6 @@
 (def exec-ops
   '{ move-arm-x
      { :name move-arm-x
-       :achieves ((at ?p ?c))
-       :when ( (arm ?p)
-               (retracted ?p)
-               (column ?c)
-               (at ?p ?oc)
-               (direction ?p x)
-               (nlogo-name ?p ?name)
-               )
        :pre ( (arm ?p)
               (retracted ?p)
               (column ?c)
@@ -204,14 +196,6 @@
        }
      move-arm-y
      { :name move-arm-y
-       :achieves ((at ?p ?c))
-       :when ( (arm ?p)
-               (retracted ?p)
-               (column ?c)
-               (at ?p ?oc)
-               (direction ?p y)
-               (nlogo-name ?p ?name)
-               )
        :pre ( (arm ?p)
               (retracted ?p)
               (column ?c)
@@ -228,16 +212,6 @@
        }
      push-up
      { :name push-up
-       :achieves ((y ?s ?y))
-       :when ( (column ?c)
-               (column ?y)
-               (shape ?s)
-               (canpush ?p bottomshapes)
-               (y ?s ?oy)
-               (x ?s ?c)
-               (at ?p ?c)
-               (nlogo-name ?p ?name))
-
        :pre ( (column ?c)
               (column ?y)
               (shape ?s)
@@ -252,19 +226,10 @@
        :add ( (y ?s ?y)
               )
        :txt (pushing up at column ?c from ?oy)
-       :cmd ((push-shape ?name ?c ?y))
+       :cmd ((push-shape ?name ?c ?y ?oy))
        }
       push-right
        { :name push-right
-         :achieves ((x ?s ?x))
-         :when ((column ?c)
-                 (column ?x)
-                 (shape ?s)
-                 (canpush ?p sideshapes)
-                 (x ?s ?ox)
-                 (y ?s ?c)
-                 (at ?p ?c)
-                 (nlogo-name ?p ?name))
          :pre ( (column ?c)
                 (column ?x)
                 (shape ?s)
@@ -279,7 +244,7 @@
          :add ( (x ?s ?x)
                 )
          :txt (pushing right at column ?c from ?ox)
-         :cmd ((push-shape ?name ?c ?x))
+         :cmd ((push-shape ?name ?c ?x ?ox))
          }
 
     })
@@ -403,7 +368,7 @@
 (def world
   '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)(column c8)(column c9)
      (at c1 c1)(at c2 c2)(at c3 c3)(at c4 c4)(at c5 c5)(at c6 c6)(at c7 c7)(at c8 c8)(at c9 c9)
-     (row r1)(row r2)(row r3)(row r4)(row r5)(row r6)(row r7)(row r8)(row r9)
+     ;(row r1)(row r2)(row r3)(row r4)(row r5)(row r6)(row r7)(row r8)(row r9)
      (canpush arm194 sideshapes)
      (canpush arm193 bottomshapes)
      (canpush arm192 topshapes)
@@ -530,6 +495,8 @@
       str-qt   (fn[x] (str " \"" x "\" "))    ; wrap x in quotes
       column-no (fn[x] (apply str (rest (str x))))   ; strip "s" of stack name
       ]
+  (defn parse-int [s]
+    (read-string (column-no s)))
 
 
   (defmatch nlogo-translate-cmd []
@@ -544,7 +511,7 @@
     ;((push ?s) :=> (str 'exec.pick-from sp (stack-no (? s))))
 
     ((move-pusher ?p ?c) :=> (str 'exec.move-to (str-qt (? p)) (column-no(? c))))
-    ((push-shape ?p ?c ?s) :=> (str 'pushshape (str-qt (? p)) (column-no(? c)) sp (column-no(? s))))
+    ((push-shape ?p ?c ?s ?o) :=> (str 'pushshape (str-qt (? p)) (column-no(? c)) sp (- (parse-int (? s)) (parse-int (? o)))))
 
     ( ?_            :=> (ui-out :dbg 'ERROR '(unknown NetLogo cmd)))
     ))
