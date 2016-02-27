@@ -90,13 +90,33 @@
 (defn concat-all [coll]
   (join " " coll))
 
+
 (defn n-logosend1
-  [results]
-  ;(nlogo-send-exec (:cmds results))
-  ; (doall (map (nlogo-send-exec (:cmds results))))
-  ; (doall (map nlogo-send-exec :cmds))
-  ;  (doall (map nlogo-send-exec (:cmds results)))
-  (doall (map nlogo-send-exec (:cmds results)))
-  (:cmds  results)
-  ;get the cmds from results and send it to nlogo-send-exec
-  )
+[results]
+
+
+(nlogo-send '(startup))
+
+(def one (count [:cmds results]))
+(def two "finrepl")
+
+(prn (count (:cmds results)))
+ (nlogo-send (list two one))
+;(nlogo-send-exec (:cmds results))
+; (doall (map (nlogo-send-exec (:cmds results))))
+; (doall (map nlogo-send-exec :cmds))
+;  (doall (map nlogo-send-exec (:cmds results)))
+()
+(doall (map nlogo-send-exec (:cmds results)))
+(:cmds  results)
+;get the cmds from results and send it to nlogo-send-exec
+)
+
+
+
+;(declare nlogo-translate-cmd)
+;(def cmd1 '((at Tblue c3)))
+;
+;(defn test1 [cmd]
+;  (n-logosend1 (ops-search state cmd ops :world world))
+;  )
