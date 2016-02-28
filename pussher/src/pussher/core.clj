@@ -6,12 +6,12 @@
 ;================================
 ;copy the following commited line of code, remove the comma and load them into the REPL
 
-;(load-file "src/pussher/matcher.clj")
-;(load-file "src/pussher/ops_search.clj")
-;(load-file "src/pussher/planner.clj")
-;(load-file "src/pussher/wrappers.clj")
-;(load-file "src/pussher/definitions.clj")
-;(load-file "src/pussher/core.clj")
+(load-file "pussher/src/pussher/matcher.clj")
+(load-file "pussher/src/pussher/ops_search.clj")
+(load-file "pussher/src/pussher/planner.clj")
+(load-file "pussher/src/pussher/wrappers.clj")
+(load-file "pussher/src/pussher/definitions.clj")
+(load-file "pussher/src/pussher/core.clj")
 
 
 

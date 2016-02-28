@@ -4,8 +4,8 @@
 
 (def settings
   {
-    :search-type :breadth-first
-    ;:search-type :strips
+    ;:search-type :breadth-first
+    :search-type :strips
     })
 
 
@@ -217,7 +217,6 @@
               (shape ?s)
               (canpush ?p bottomshapes)
               (y ?s ?oy)
-              (x ?s ?c)
               (at ?p ?c)
               (nlogo-name ?p ?name)
               )
@@ -235,7 +234,6 @@
                 (shape ?s)
                 (canpush ?p sideshapes)
                 (x ?s ?ox)
-                (y ?s ?c)
                 (at ?p ?c)
                 (nlogo-name ?p ?name)
                 )
@@ -366,9 +364,8 @@
 ;World States
 ;=============================
 (def world
-  '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)(column c8)(column c9)
-     (at c1 c1)(at c2 c2)(at c3 c3)(at c4 c4)(at c5 c5)(at c6 c6)(at c7 c7)(at c8 c8)(at c9 c9)
-     ;(row r1)(row r2)(row r3)(row r4)(row r5)(row r6)(row r7)(row r8)(row r9)
+  '#{(column c1)(column c2)(column c3)(column c4)(column c5)(column c6)(column c7)(column c8)
+     (at c1 c1)(at c2 c2)(at c3 c3)(at c4 c4)(at c5 c5)(at c6 c6)(at c7 c7)(at c8 c8)
      (canpush arm194 sideshapes)
      (canpush arm193 bottomshapes)
      (canpush arm192 topshapes)
@@ -391,22 +388,45 @@
      (shape t1)
      (shape t2)
      (shape t3)
+     (shape s2)
      (x t1 c2)
-     (x t2 c3)
-     (x t3 c4)
      (y t1 c1)
+     (x t2 c3)
      (y t2 c1)
+     (x t3 c4)
      (y t3 c1)
+     (x s2 c3)
+     (y s2 c8)
      })
 
 (def goalState
   '#{
-     ;(at arm192 c5)
-     ;(at arm193 c8)
-     ;(at arm194 c4)
-     (y t1 c4)
-     (x t1 c7)
-     ;(shapeloc t3 middle)
+     (y t1 c2)
+     (x t1 c2)
+     (y t3 c3)
+     (x t3 c3)
+     (y s2 c4)
+     (x s2 c4)
+     })
+
+     (def goalState2
+       '#{
+          (y t1 c2)
+          (x t1 c6)
+          })
+
+     (def goalState3
+       '#{
+          (y t1 c2)
+          (x t1 c2)
+          (y t3 c4)
+          (x t3 c5)
+          })
+
+(def goalState4
+  '#{
+     (y t1 c3)
+     (x t1 c3)
      })
 
 
@@ -545,3 +565,9 @@
                          ))
   )
 
+(defn test-custom [cmds]
+  (nlogo-send "startup")
+  (nlogo-send "setUpShapes")
+  (command-caller (:cmds (ops-search startState cmds exec-ops :world world)
+                         ))
+  )
