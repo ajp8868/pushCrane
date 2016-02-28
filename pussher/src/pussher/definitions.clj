@@ -12,71 +12,91 @@
 ;================================
 (def planner-ops
            '{
-             :moveVert{:name moveVertical
-                       :achieves (at ?block ?col2)
-                       :post (())
-                       :when ( (isa ?col2 coly)
-                               (at ?block ?col)
-                               (isa ?col coly)
-                               )
-                       :pre ()
-                       :del (  (at ?block ?col))
-                       :add ( (at ?block ?col2))
 
-                       :txt  ((move ?block from ?col to ?col2 ))
-                       :cmd ((moveVert ?col3 ?col2 ?col))
-                       }
-             :moveHoroz{:name moveHoroz
-                        :achieves (at ?block ?col2)
-                        :post (at ?block ?col2)
-                        :when ( (isa ?col2 colx)
-                                (at ?block ?col)
-                                (isa ?col colx)
-                                )
-                        :del (  (at ?block ?col))
-                        :add ( (at ?block ?col2))
-                        :pre ()
-                        :txt  ((move ?block from ?col to ?col2 ))
-                        :cmd ((moveHoroz ?col3 ?col2 ?col))
-                        }
-             :crtBlock{:name create-block
+             :moveArm-vert{:name moveArm-vert
+                           :achieves (at ?arm ?col2)
+                           :post ()
+                           :when ( (isa ?col2 coly)
+                                   (at ?arm ?col)
+                                   (isa ?col coly)
+                                   (isa ?arm arm))
+                           :del (  (at ?arm ?col))
+                           :add ( (at ?arm ?col2))
+                           :pre ()
+                           :txt  ((move ?arm from ?col to ?col2 ))
+                           :cmd ((moveArm ?arm ?col2))
+                           }
+             :moveArm-hoz{:name moveArm-hoz
+                            :achieves (at ?arm ?col2)
+                            :post ()
+                            :when ( (isa ?col2 colx)
+                                    (isa ?arm arm)
+                                    (at ?arm ?col)
+                                    (isa ?col colx)
+                                    )
+                            :del (  (at ?arm ?col))
+                            :add ( (at ?arm ?col2))
+                            :pre ()
+                            :txt  ((move ?arm from ?col to ?col2 ))
+                            :cmd ((moveArm ?arm ?col2))
+                            }
+             :crtBlock{:name crtBlock
                        :achieves (crt ?block tr)
-                       :post (crt ?block fls)
-                       :when ((crt ?block fls))
+                       :when ( (crt ?block fls)
+                               (crtx ?block ?crtx1)
+                               (crty ?block ?crty1)
+                               )
+                       :post ( (at B ?crtx1)
+                               (at L ?crty1))
+                       :pre((isa ?block block)
+                             (crt ?block fls)
+                             )
+                       :add ((crt ?block tr)
+                              (at ?block ?crtx1)
+                              (at ?block ?crty1))
                        :del ((crt ?block fls))
-                       :add ((crt ?block tr))
-                       :pre()
-                       :txt ((creat ?block))
                        :cmd ((create ?block))
+                       :txt ((creat ?block ))
+                       }
+             :push-vert{:name push-vertical
+                        :achieves (at ?block ?col2)
+                        :when ( (isa ?block block)
+                                (isa ?col2 coly)
+                                )
+                        :post ((crt ?block tr)
+                                )
+                        :pre ((at ?block ?col)
+                               (isa ?col coly)
+                               (at ?block ?col3)
+                               (isa ?col3 colx)
+                               (isa ?block block)
+                               (isa ?col2 coly)
+                               )
+                        :add ( (at ?block ?col2))
+                        :del (  (at ?block ?col))
+                        :cmd ((push-vert ?col3 ?col2 ?col))
+                        :txt  ((move ?block from ?col to ?col2 at col ?col3))
+
+                        }
+             :push-hoz{:name push-hoz
+                       :achieves (at ?block ?col2)
+                       :when ( (isa ?block block)
+                               (isa ?col2 colx)
+                               )
+                       :post ((crt ?block tr))
+                       :pre ((at ?block ?col)
+                              (isa ?col colx)
+                              (at ?block ?col3)
+                              (isa ?col3 coly)
+                              (isa ?block block)
+                              (isa ?col2 colx)
+                              )
+                       :add ( (at ?block ?col2))
+                       :del (  (at ?block ?col))
+                       :cmd ((push-hoz L ?col3 ?col2 ?col))
+                       :txt  ((move ?block from ?col to ?col2 at col ?col3))
 
                        }
-             :moveArmVert{:name moveArmVertical
-                          :achieves (at ?arm ?col2)
-                          :post ()
-                          :when ( (isa ?col2 coly)
-                                  (at ?arm ?col)
-                                  (isa ?col coly)
-                                  )
-                          :del (  (at ?arm ?col))
-                          :add ( (at ?arm ?col2))
-                          :pre ()
-                          :txt  ((move ?arm from ?col to ?col2 ))
-                          :cmd ((moveArmVert ?arm ?col2 ?col))
-                          }
-             :moveArm{:name moveArmHorozontel
-                      :achieves (at ?arm ?col2)
-                      :post ()
-                      :when ( (isa ?col2 coly)
-                              (at ?arm ?col)
-                              (isa ?col coly)
-                              )
-                      :del (  (at ?arm ?col))
-                      :add ( (at ?arm ?col2))
-                      :pre ()
-                      :txt  ((move ?arm from ?col to ?col2 ))
-                      :cmd ((moveArmVert ?arm ?col2 ?col))
-                      }
-
              }
            )
 ;================================
@@ -85,7 +105,7 @@
 
 (def ops
         '{
-          moveVert {:pre ((isa ?block block)
+          push-vert {:pre ((isa ?block block)
                            (crt ?block tr)
                            (isa ?col coly)
                            (isa ?col3 colx)
@@ -96,9 +116,9 @@
                     :add ((at ?block ?col2))
                     :del ((at ?block ?col))
                     :txt ((move ?block from ?col to ?col2))
-                    :cmd (moveVert ?col3 ?col2 ?col)
+                    :cmd (push-vert ?col3 ?col2 ?col)
                     }
-          moveHoroz {:pre ((isa ?block block)
+          push-hoz {:pre ((isa ?block block)
                            (crt ?block tr)
                            (isa ?col colx)
                            (isa ?col3 coly)
@@ -109,7 +129,7 @@
                     :add ((at ?block ?col2))
                     :del ((at ?block ?col))
                     :txt ((move ?block from ?col to ?col2))
-                    :cmd (moveHoz L ?col3 ?col2 ?col)
+                    :cmd (push-hoz L ?col3 ?col2 ?col)
                     }
           createBlock{:pre ( (isa ?block block)
                              (crt ?block fls)
@@ -152,6 +172,7 @@
 ;================================
 (def state
   '#{
+
      (at T c1)
      (at B c1)
      (at L y1)
@@ -163,8 +184,19 @@
      (at Cblue y1)
 
      (crt Tblue fls)
-     (crt Cblue fls)
+     (crt Tred fls)
+     (crt Tyellow fls)
+     (crt Tgreen fls)
 
+     (crt Cblue fls)
+     (crt Cred fls)
+     (crt Cyellow fls)
+     (crt Cgreen fls)
+
+     (crt Sblue fls)
+     (crt Sred fls)
+     (crt Syellow fls)
+     (crt Sgreen fls)
      }
   )
 
@@ -230,8 +262,8 @@
               (crtx Sred c1)
               (crty Sred y5)
 
-              (isa c1 colx) (isa c2 colx) (isa c3 colx);(isa c4 colx)(isa c5 colx)(isa c6 colx)(isa c7 colx)(isa c8 colx);
-              (isa y1 coly) (isa y2 coly) (isa y3 coly);(isa y4 coly)(isa y5 coly)(isa y6 coly)(isa y7 coly)(isa y8 coly);
+              (isa c1 colx) (isa c2 colx) (isa c3 colx)(isa c4 colx)(isa c5 colx)(isa c6 colx)(isa c7 colx)(isa c8 colx);
+              (isa y1 coly) (isa y2 coly) (isa y3 coly)(isa y4 coly)(isa y5 coly)(isa y6 coly)(isa y7 coly)(isa y8 coly);
 
               })
 ;================================
@@ -252,14 +284,14 @@
 
             ((create ?nam )
               :=> (str 'exec.make (str-qt (? nam)) sp (str-qt(axis-no (? nam)))  ))
-            ((moveVert ?ax ?to ?from)
+            ((push-vert ?ax ?to ?from)
               := (str 'pushshapeTwo sp (axis-no(? ax)) sp (axis-no(? to)) sp (axis-no(? from))))
-            ((moveHoz ?arm ?ax ?to ?from)
+            ((push-hoz ?arm ?ax ?to ?from)
               := (str 'pushshapeOne  (str-qt (? arm)) sp (axis-no(? ax)) sp (axis-no(? to)) sp (axis-no(? from))))
             ((moveArm ?a ?c)
               :=> (str 'exec.move-to sp (str-qt (? a)) sp (axis-no(? c))))
-
+            ((repl ?d)
+              :=> (str 'finrepl sp  sp (? d)))
 
             ))
-
 
