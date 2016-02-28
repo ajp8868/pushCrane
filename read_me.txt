@@ -11,4 +11,11 @@ To setup the PushCrane project which includes the limited functionality ops-sear
 
 
 pussher-
+has a working ops-search
+has a working planner
 
+How to set up,
+open pussher.core
+all file that are needed to load are commented out just under the name space,
+you can remove the semi colon and copy it and paste into the REPL
+if that doesn't work 
