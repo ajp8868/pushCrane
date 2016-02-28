@@ -15,7 +15,12 @@ has a working ops-search
 has a working planner
 
 How to set up,
-open pussher.core
+1.open pussher.core
 all file that are needed to load are commented out just under the name space,
 you can remove the semi colon and copy it and paste into the REPL
-if that doesn't work 
+if that doesn't work load each file in the same folder
+
+all the test used are already wthin the core.clj
+
+Netlogo
+
